@@ -675,8 +675,8 @@ function setupAlphabetQuestion() {
     // Setup feedback display (shown after answer)
     document.getElementById('feedbackPicture').textContent = letter.picture || '📖';
     // Highlight the key letter in the Bulgarian word and transliteration
-    document.getElementById('feedbackWord').innerHTML = highlightLetterInWord(letter.word, letter.phonetic, true);
-    document.getElementById('feedbackTranslit').innerHTML = highlightLetterInWord(letter.translit || '', letter.phonetic, false);
+    document.getElementById('feedbackWordBulgarian').innerHTML = highlightLetterInWord(letter.word, letter.phonetic, true);
+    document.getElementById('feedbackWordEnglish').innerHTML = highlightLetterInWord(letter.translit || '', letter.phonetic, false);
 
     const choicesContainer = document.getElementById('alphabetChoices');
     choicesContainer.innerHTML = choices.map((c, i) => `
@@ -766,10 +766,11 @@ function selectAlphabetChoice(choiceIndex) {
             // Show admin section for admin users
             if (isAdmin()) {
                 showAdminLetterRecording(questionIdx);
+                // Don't auto-advance for admin - they need time to record audio
+            } else {
+                // Start auto-advance countdown (2 seconds) only for non-admin users
+                startAutoAdvanceCountdown();
             }
-
-            // Start auto-advance countdown (2 seconds)
-            startAutoAdvanceCountdown();
         }, 1000);
     }, 500);
 }
