@@ -290,7 +290,7 @@ function updateHomeScreen() {
     // Vocab progress
     const mastered = state.vocab.mastered.length;
     const total = state.vocab.words.length;
-    const learning = state.vocab.words.filter(w => w.introduced && !state.vocab.mastered.includes(state.vocab.words.indexOf(w))).length;
+    const learning = state.vocab.words.filter(w => w.introduced && !state.vocab.mastered.includes(w.id)).length;
 
     document.getElementById('vocabCount').textContent = mastered;
 
@@ -540,6 +540,8 @@ function speakLetterWithHint(letter) {
 }
 
 // ============ Alphabet Module ============
+let autoAdvanceTimer = null;
+
 function initSRS(idx) {
     if (!state.alphabet.srs[idx]) {
         state.alphabet.srs[idx] = { box: 0, correct: 0, lastSeen: 0 };
@@ -547,9 +549,84 @@ function initSRS(idx) {
     return state.alphabet.srs[idx];
 }
 
+// Highlight the key letter in a word based on phonetic sound
+function highlightLetterInWord(word, phonetic, isCyrillic) {
+    if (!word || !phonetic) return word;
+
+    // Map phonetic sounds to their Cyrillic and Latin equivalents
+    const phoneticMap = {
+        'ah': { cyrillic: ['а', 'я'], latin: ['a'] },
+        'b': { cyrillic: ['б'], latin: ['b'] },
+        'v': { cyrillic: ['в'], latin: ['v'] },
+        'g': { cyrillic: ['г'], latin: ['g'] },
+        'd': { cyrillic: ['д'], latin: ['d'] },
+        'e': { cyrillic: ['е'], latin: ['e'] },
+        'zh': { cyrillic: ['ж'], latin: ['zh'] },
+        'z': { cyrillic: ['з'], latin: ['z'] },
+        'ee': { cyrillic: ['и'], latin: ['i'] },
+        'y': { cyrillic: ['й'], latin: ['y'] },
+        'k': { cyrillic: ['к'], latin: ['k'] },
+        'l': { cyrillic: ['л'], latin: ['l'] },
+        'm': { cyrillic: ['м'], latin: ['m'] },
+        'n': { cyrillic: ['н'], latin: ['n'] },
+        'o': { cyrillic: ['о'], latin: ['o'] },
+        'p': { cyrillic: ['п'], latin: ['p'] },
+        'r': { cyrillic: ['р'], latin: ['r'] },
+        's': { cyrillic: ['с'], latin: ['s'] },
+        't': { cyrillic: ['т'], latin: ['t'] },
+        'oo': { cyrillic: ['у'], latin: ['u'] },
+        'f': { cyrillic: ['ф'], latin: ['f'] },
+        'h': { cyrillic: ['х'], latin: ['h'] },
+        'ts': { cyrillic: ['ц'], latin: ['ts'] },
+        'ch': { cyrillic: ['ч'], latin: ['ch'] },
+        'sh': { cyrillic: ['ш'], latin: ['sh'] },
+        'sht': { cyrillic: ['щ'], latin: ['sht'] },
+        'uh': { cyrillic: ['ъ'], latin: ['u'] },
+        '(soft)': { cyrillic: ['ь'], latin: [] },
+        'yu': { cyrillic: ['ю'], latin: ['yu'] },
+        'ya': { cyrillic: ['я'], latin: ['ya'] },
+    };
+
+    const mapping = phoneticMap[phonetic];
+    if (!mapping) return word;
+
+    const chars = isCyrillic ? mapping.cyrillic : mapping.latin;
+    if (!chars || chars.length === 0) return word;
+
+    // Find and highlight the first occurrence of any matching character
+    let result = word;
+    let highlighted = false;
+
+    for (const char of chars) {
+        if (highlighted) break;
+
+        // Case-insensitive search
+        const lowerWord = word.toLowerCase();
+        const lowerChar = char.toLowerCase();
+        const idx = lowerWord.indexOf(lowerChar);
+
+        if (idx !== -1) {
+            const matchedChars = word.substring(idx, idx + char.length);
+            result = word.substring(0, idx) +
+                     `<span class="letter-highlight">${matchedChars}</span>` +
+                     word.substring(idx + char.length);
+            highlighted = true;
+        }
+    }
+
+    return result;
+}
+
 function setupAlphabetQuestion() {
+    // Clear any existing auto-advance timer
+    if (autoAdvanceTimer) {
+        clearTimeout(autoAdvanceTimer);
+        autoAdvanceTimer = null;
+    }
+
     // Reset UI
     document.getElementById('nextLetterBtn').classList.add('hidden');
+    document.getElementById('autoAdvanceCountdown').textContent = '';
     document.getElementById('alphabetChoices').classList.remove('hidden');
     document.getElementById('answerFeedback').classList.add('hidden');
     document.getElementById('letterCardFront').style.display = 'block';
@@ -592,10 +669,10 @@ function setupAlphabetQuestion() {
     document.getElementById('alphabetLetter').textContent = letter.letter;
 
     // Setup feedback display (shown after answer)
-    document.getElementById('feedbackSound').textContent = letter.phonetic;
     document.getElementById('feedbackPicture').textContent = letter.picture || '📖';
-    document.getElementById('feedbackTranslit').textContent = letter.translit || '';
-    document.getElementById('feedbackWord').textContent = letter.word;
+    // Highlight the key letter in the Bulgarian word and transliteration
+    document.getElementById('feedbackWord').innerHTML = highlightLetterInWord(letter.word, letter.phonetic, true);
+    document.getElementById('feedbackTranslit').innerHTML = highlightLetterInWord(letter.translit || '', letter.phonetic, false);
 
     const choicesContainer = document.getElementById('alphabetChoices');
     choicesContainer.innerHTML = choices.map((c, i) => `
@@ -686,11 +763,48 @@ function selectAlphabetChoice(choiceIndex) {
             if (isAdmin()) {
                 showAdminLetterRecording(questionIdx);
             }
+
+            // Start auto-advance countdown (2 seconds)
+            startAutoAdvanceCountdown();
         }, 1000);
     }, 500);
 }
 
+// Auto-advance to next letter after showing feedback
+function startAutoAdvanceCountdown() {
+    const countdownEl = document.getElementById('autoAdvanceCountdown');
+    let secondsLeft = 2;
+
+    // Update countdown display
+    countdownEl.textContent = `(${secondsLeft})`;
+
+    // Countdown interval
+    const countdownInterval = setInterval(() => {
+        secondsLeft--;
+        if (secondsLeft > 0) {
+            countdownEl.textContent = `(${secondsLeft})`;
+        } else {
+            countdownEl.textContent = '';
+            clearInterval(countdownInterval);
+        }
+    }, 1000);
+
+    // Auto-advance after 2 seconds
+    autoAdvanceTimer = setTimeout(() => {
+        clearInterval(countdownInterval);
+        // Only advance if we're still on the alphabet module
+        if (state.currentModule === 'alphabet') {
+            goToNextLetter();
+        }
+    }, 2000);
+}
+
 function goToNextLetter() {
+    // Clear auto-advance timer if user clicks manually
+    if (autoAdvanceTimer) {
+        clearTimeout(autoAdvanceTimer);
+        autoAdvanceTimer = null;
+    }
     setupAlphabetQuestion();
 }
 
@@ -1063,7 +1177,7 @@ function setupVocabQuestion() {
         // - Mastered words = low priority
         let priority = 0;
 
-        if (state.vocab.mastered.includes(originalIdx)) {
+        if (state.vocab.mastered.includes(word.id)) {
             // Mastered: low priority, but still review occasionally
             priority = 1 + Math.min(hoursSinceLastSeen / 24, 5); // Max 6
         } else if (word.correct === 0 && word.wrong === 0) {
@@ -1171,8 +1285,8 @@ function selectVocabChoice(choiceIndex) {
 
         // Mastery requires 3 correct AND good accuracy (>60%)
         const accuracy = word.correct / Math.max(1, word.correct + (word.wrong || 0));
-        if (word.correct >= 3 && accuracy >= 0.6 && !state.vocab.mastered.includes(questionIdx)) {
-            state.vocab.mastered.push(questionIdx);
+        if (word.correct >= 3 && accuracy >= 0.6 && !state.vocab.mastered.includes(word.id)) {
+            state.vocab.mastered.push(word.id);
             addBabaPoints(3, 'Word mastered!');
             logActivity('word_mastered', 'vocab', { word: word.cyrillic, meaning: word.meaning });
 
@@ -1188,7 +1302,7 @@ function selectVocabChoice(choiceIndex) {
         logActivity('quiz_wrong', 'vocab', { word: word.cyrillic, meaning: word.meaning });
 
         // If they get a mastered word wrong, remove mastery
-        const masteredIdx = state.vocab.mastered.indexOf(questionIdx);
+        const masteredIdx = state.vocab.mastered.indexOf(word.id);
         if (masteredIdx !== -1) {
             state.vocab.mastered.splice(masteredIdx, 1);
         }
@@ -2064,7 +2178,7 @@ async function saveEditedWord() {
 
     saveState();
 
-    // Update database
+    // Update database - always update in 'default' user (shared word pool)
     if (db) {
         try {
             const { error } = await db
@@ -2075,7 +2189,7 @@ async function saveEditedWord() {
                     meaning
                 })
                 .eq('id', wordId)
-                .eq('user_id', CURRENT_USER);
+                .eq('user_id', 'default');
 
             if (error) {
                 console.error('Error updating word:', error);
@@ -2120,10 +2234,12 @@ async function loadWordsFromDatabase() {
     }
 
     try {
+        // Always load words from 'default' user - these have the custom audio recordings
+        // All users share the same word pool, but progress is tracked per-user in localStorage
         const { data, error } = await db
             .from('words')
             .select('*')
-            .eq('user_id', CURRENT_USER)
+            .eq('user_id', 'default')
             .order('created_at', { ascending: true });
 
         if (error) {
@@ -2133,24 +2249,45 @@ async function loadWordsFromDatabase() {
         }
 
         if (data && data.length > 0) {
-            const dbWords = data.map(w => ({
-                id: w.id,
-                cyrillic: w.cyrillic,
-                translit: w.translit,
-                meaning: w.meaning,
-                category: w.category || 'custom',
-                level: w.level || 1, // Words 1 or Words 2
-                correct: 0,
-                audio: w.audio,
-                isCustom: true
-            }));
+            // Load saved progress from localStorage for this user
+            const savedState = localStorage.getItem(getStorageKey());
+            const savedWords = savedState ? (JSON.parse(savedState).vocab?.words || []) : [];
+
+            // Create a map of saved progress by word ID for quick lookup
+            const savedProgress = {};
+            savedWords.forEach(w => {
+                savedProgress[w.id] = {
+                    correct: w.correct || 0,
+                    wrong: w.wrong || 0,
+                    introduced: w.introduced || false,
+                    lastSeen: w.lastSeen || 0
+                };
+            });
+
+            const dbWords = data.map(w => {
+                const progress = savedProgress[w.id] || {};
+                return {
+                    id: w.id,
+                    cyrillic: w.cyrillic,
+                    translit: w.translit,
+                    meaning: w.meaning,
+                    category: w.category || 'custom',
+                    level: w.level || 1, // Words 1 or Words 2
+                    correct: progress.correct || 0,
+                    wrong: progress.wrong || 0,
+                    introduced: progress.introduced || false,
+                    lastSeen: progress.lastSeen || 0,
+                    audio: w.audio,
+                    isCustom: true
+                };
+            });
 
             state.vocab.words = dbWords;
             saveState();
             updateHomeScreen();
+            console.log(`Loaded ${dbWords.length} words from default user`);
         } else {
-            // No words for this user - try to copy from 'default' user (who added words manually)
-            await copyStarterWords();
+            console.log('No words found in default user - admin must add words');
         }
     } catch (err) {
         console.error('Database error:', err);
@@ -2158,89 +2295,16 @@ async function loadWordsFromDatabase() {
     }
 }
 
-// Copy starter words from 'default' user to current user
-// Only copies words that were manually added by someone to the 'default' user
-async function copyStarterWords() {
-    // Can't copy if no database or if we're the default user
-    if (!db || CURRENT_USER === 'default') {
-        console.log('No words to copy - user must add words manually');
-        return;
-    }
-
-    try {
-        console.log('Checking for starter words to copy for new user:', CURRENT_USER);
-
-        // Get default words (these should only exist if someone manually added them)
-        const { data: defaultWords, error } = await db
-            .from('words')
-            .select('*')
-            .eq('user_id', 'default')
-            .order('created_at', { ascending: true });
-
-        if (error || !defaultWords || defaultWords.length === 0) {
-            console.log('No default words to copy - user must add words manually');
-            return;
-        }
-
-        // Copy each word with new ID for this user
-        const copiedWords = [];
-        for (let i = 0; i < defaultWords.length; i++) {
-            const w = defaultWords[i];
-            const newId = Date.now() + i;
-
-            const newWord = {
-                id: newId,
-                user_id: CURRENT_USER,
-                cyrillic: w.cyrillic,
-                translit: w.translit,
-                meaning: w.meaning,
-                category: w.category || 'custom',
-                level: w.level || 1,
-                audio: w.audio
-            };
-
-            const { error: insertError } = await db.from('words').insert(newWord);
-            if (!insertError) {
-                copiedWords.push({
-                    id: newId,
-                    cyrillic: w.cyrillic,
-                    translit: w.translit,
-                    meaning: w.meaning,
-                    category: w.category || 'custom',
-                    level: w.level || 1,
-                    correct: 0,
-                    audio: w.audio,
-                    isCustom: false
-                });
-            }
-
-            // Small delay to ensure unique IDs
-            await new Promise(r => setTimeout(r, 10));
-        }
-
-        if (copiedWords.length > 0) {
-            state.vocab.words = copiedWords;
-            saveState();
-            updateHomeScreen();
-            console.log(`Copied ${copiedWords.length} starter words`);
-            showUnlockMessage(`Welcome! ${copiedWords.length} words ready to learn!`);
-        }
-        // If no words were copied, that's fine - user can add words manually
-    } catch (err) {
-        console.error('Error copying starter words:', err);
-        // Leave words empty - user can add words manually
-    }
-}
-
 async function saveWordToDatabase(word) {
     if (!db) return;
 
     try {
+        // Always save words to 'default' user - shared word pool with custom audio
         const { error } = await db
             .from('words')
             .insert({
                 id: word.id,
-                user_id: CURRENT_USER,
+                user_id: 'default',
                 cyrillic: word.cyrillic,
                 translit: word.translit,
                 meaning: word.meaning,
@@ -2260,11 +2324,12 @@ async function deleteWordFromDatabase(wordId) {
     if (!db) return;
 
     try {
+        // Delete from 'default' user - shared word pool
         const { error } = await db
             .from('words')
             .delete()
             .eq('id', wordId)
-            .eq('user_id', CURRENT_USER);
+            .eq('user_id', 'default');
 
         if (error) {
             console.error('Error deleting word:', error);
