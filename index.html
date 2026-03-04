@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="theme-color" content="#8B5CF6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Bulgarian for Kids!</title>
+    <link rel="stylesheet" href="styles.css?v=20250302c">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <button id="backBtn" class="back-btn hidden" onclick="goHome()">←</button>
+            <h1 id="headerTitle">
+                <span class="mascot">🐻</span> <span id="appTitle">Learn Bulgarian!</span>
+            </h1>
+            <button class="header-btn inbox-btn" onclick="openInbox()">
+                💌
+                <span id="inboxBadge" class="inbox-badge hidden">0</span>
+            </button>
+            <button class="header-btn" onclick="openAdmin()">📝</button>
+            <button class="header-btn" onclick="openSettings()">⚙️</button>
+        </header>
+
+        <!-- Home Screen -->
+        <main id="homeScreen" class="content">
+            <!-- Mascot Welcome -->
+            <div class="mascot-welcome">
+                <div class="mascot-big">🐻</div>
+                <div class="mascot-speech">
+                    <span id="mascotGreeting">Hi friend! Let's learn Bulgarian!</span>
+                </div>
+            </div>
+
+            <!-- Baba Points Display -->
+            <div class="baba-points-bar">
+                <div class="baba-icon"><img src="baba.png" alt="Baba" class="baba-img"></div>
+                <div class="baba-info">
+                    <div class="baba-count"><span id="babaPoints">0</span> Baba Points!</div>
+                    <div class="baba-level">
+                        <span class="star" id="star1">⭐</span>
+                        <span class="star" id="star2">☆</span>
+                        <span class="star" id="star3">☆</span>
+                    </div>
+                </div>
+                <div class="streak-bubble">
+                    <span id="currentStreak">0</span>🔥
+                </div>
+            </div>
+
+            <!-- Daily Goal (simplified) -->
+            <div class="daily-goal-kids">
+                <div class="daily-stars">
+                    <span id="dailyStar1">☆</span>
+                    <span id="dailyStar2">☆</span>
+                    <span id="dailyStar3">☆</span>
+                    <span id="dailyStar4">☆</span>
+                    <span id="dailyStar5">☆</span>
+                </div>
+                <span class="daily-label" id="dailyText">Play 5 cards to fill the stars!</span>
+            </div>
+
+            <!-- Modules - Big colorful buttons -->
+            <div class="modules-container-kids">
+                <div class="module-card-kids alphabet-card" onclick="startModule('alphabet')">
+                    <div class="module-icon-big">🔤</div>
+                    <div class="module-name">ABC Letters</div>
+                    <div class="module-progress-kids" id="alphabetProgress">
+                        <div class="mini-stars" id="alphabetStars"></div>
+                    </div>
+                </div>
+
+                <div class="module-card-kids vocab-card" onclick="startModule('vocab')">
+                    <div class="module-icon-big">🎨</div>
+                    <div class="module-name">Words</div>
+                    <div class="module-progress-kids" id="vocabProgress">
+                        <span id="vocabCount">0</span> mastered
+                    </div>
+                    <div class="module-subprogress" id="vocabSubprogress"></div>
+                </div>
+
+                <div class="module-card-kids testme-card" onclick="startModule('testme')">
+                    <div class="module-icon-big">🎤</div>
+                    <div class="module-name">Test Me!</div>
+                    <div class="module-progress-kids" id="testmeProgress">
+                        <span id="testmeScore">0</span> correct!
+                    </div>
+                </div>
+            </div>
+
+            <!-- TV Store -->
+            <div class="reward-chart tv-store-card" onclick="openTvStore()">
+                <div class="reward-header">
+                    <span class="reward-icon">📺</span>
+                    <span class="reward-title">TV Store!</span>
+                </div>
+                <div class="reward-preview">
+                    <div class="tv-earned">
+                        <span class="tv-minutes" id="tvMinutesAvailable">0</span>
+                        <span class="tv-label">minutes to use!</span>
+                    </div>
+                    <div class="tv-points-balance">
+                        <img src="baba.png" class="baba-img-tiny" alt="Baba">
+                        <span id="tvPointsBalance">0</span> points to spend
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add New Word Button -->
+            <div class="add-word-card" onclick="openAddWord()">
+                <span class="add-word-icon">➕</span>
+                <span class="add-word-text">Add New Word</span>
+            </div>
+
+            <!-- Send Message Button (for grandparents) -->
+            <div id="sendMessageCard" class="add-word-card send-message-card" onclick="openSendMessage()">
+                <span class="add-word-icon">💌</span>
+                <span class="add-word-text">Send a Message</span>
+            </div>
+
+            <!-- View Progress Button (for grandparents) -->
+            <div id="adminViewCard" class="add-word-card admin-view-card" onclick="openAdminView()">
+                <span class="add-word-icon">👀</span>
+                <span class="add-word-text">View Progress</span>
+            </div>
+
+            <!-- Sticker Collection Preview -->
+            <div class="sticker-collection" onclick="openAchievements()">
+                <span class="sticker-label">My Stickers</span>
+                <div class="sticker-preview" id="stickerPreview">
+                    <!-- Filled by JS -->
+                </div>
+            </div>
+        </main>
+
+        <!-- Alphabet Module -->
+        <section id="alphabetModule" class="content module-screen hidden">
+            <div class="module-stats-kids">
+                <div class="mascot-mini">🐻</div>
+                <span id="alphabetMasteredCount">Let's go!</span>
+                <span id="streakDisplay">🔥 0</span>
+            </div>
+            <div class="progress-bar-kids">
+                <div id="alphabetProgressBar" class="progress-fill-kids"></div>
+            </div>
+
+            <div id="alphabetCard" class="flashcard-kids">
+                <div class="flashcard-inner">
+                    <div class="flashcard-front">
+                        <div class="question-prompt-kids">What sound?</div>
+                        <div class="letter-display-kids" id="alphabetLetter">А а</div>
+                        <button class="speak-btn-kids" onclick="speakCurrentLetter()">🔊 Hear it!</button>
+                    </div>
+                    <div class="flashcard-back">
+                        <div class="letter-display-kids" id="answerLetter">А а</div>
+                        <div class="sound-display-kids" id="answerSound">ah</div>
+                        <div class="sound-hint-kids" id="answerHint">like "a" in "father"</div>
+                        <button class="speak-btn-kids" onclick="speakCurrentLetter()">🔊 Again!</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="choices-grid-kids" id="alphabetChoices">
+                <!-- Choices populated by JS -->
+            </div>
+
+            <button id="nextLetterBtn" class="btn-kids primary-kids hidden" onclick="goToNextLetter()">
+                Next! →
+            </button>
+        </section>
+
+        <!-- Vocab Module -->
+        <section id="vocabModule" class="content module-screen hidden">
+            <div class="module-stats-kids">
+                <div class="mascot-mini">🐻</div>
+                <span id="vocabMasteredCount">Let's learn words!</span>
+                <span id="vocabStreakDisplay">🔥 0</span>
+            </div>
+            <div class="progress-bar-kids">
+                <div id="vocabProgressBar" class="progress-fill-kids"></div>
+            </div>
+
+            <div id="vocabEmpty" class="empty-state-kids">
+                <div class="mascot-big">🐻</div>
+                <p>No words yet!</p>
+                <p style="font-size: 16px; margin-bottom: 16px;">Add words from the home screen</p>
+                <button class="btn-kids primary-kids" onclick="goHome()">← Go Back</button>
+            </div>
+
+            <div id="vocabCardContainer" class="hidden">
+                <div class="question-card-kids">
+                    <div class="question-prompt-kids">What does this mean?</div>
+                    <div class="word-display-kids" id="vocabCyrillic">Здравей</div>
+                    <div class="word-translit-kids" id="vocabTranslit">Zdravey</div>
+                    <button class="speak-btn-kids" onclick="speakCurrentWord()">🔊 Hear it!</button>
+                </div>
+
+                <div class="choices-grid-kids" id="vocabChoices">
+                    <!-- Choices populated by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Test Me Module -->
+        <section id="testMeModule" class="content module-screen hidden">
+            <div class="module-stats-kids">
+                <div class="mascot-mini">🐻</div>
+                <span id="testmeMasteredCount">Say it in Bulgarian!</span>
+                <span id="testmeStreakDisplay">🔥 0</span>
+            </div>
+            <div class="progress-bar-kids">
+                <div id="testmeProgressBar" class="progress-fill-kids"></div>
+            </div>
+
+            <div id="testmeEmpty" class="empty-state-kids hidden">
+                <div class="mascot-big">🐻</div>
+                <p>Need more words!</p>
+                <p style="font-size: 16px; margin-bottom: 16px;">Add at least 3 words first</p>
+                <button class="btn-kids primary-kids" onclick="goHome()">← Go Back</button>
+            </div>
+
+            <div id="testmeCardContainer">
+                <div class="question-card-kids testme-question">
+                    <div class="question-prompt-kids">🇺🇸 Say this in Bulgarian:</div>
+                    <div class="word-display-kids testme-english" id="testmeEnglish">Hello</div>
+                </div>
+
+                <!-- Recording Section -->
+                <div class="testme-record-section">
+                    <div class="audio-recorder testme-recorder">
+                        <button id="testmeRecordBtn" class="record-btn testme-record-btn" onclick="toggleTestMeRecording()">
+                            <span id="testmeRecordIcon">🎤</span>
+                            <span id="testmeRecordText">Tap & Speak</span>
+                        </button>
+                        <div id="testmeRecordingIndicator" class="recording-indicator hidden">
+                            <span class="recording-dot"></span>
+                            Listening...
+                        </div>
+                        <div id="testmeAudioPlayback" class="audio-playback hidden">
+                            <button class="play-btn" onclick="playTestMeRecording()">▶️ Play Mine</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Result Section (shows what was heard) -->
+                <div id="testmeResultSection" class="testme-result-section hidden">
+                    <div id="testmeResultLabel" class="result-label">Checking...</div>
+                    <div class="you-said">
+                        <span class="you-said-label">You said:</span>
+                        <span class="you-said-text" id="testmeYouSaid">...</span>
+                    </div>
+                </div>
+
+                <!-- Answer Reveal Section -->
+                <div id="testmeAnswerSection" class="testme-answer-section hidden">
+                    <div class="testme-correct-answer">
+                        <div class="answer-label">✨ Correct answer:</div>
+                        <div class="answer-cyrillic" id="testmeCorrectCyrillic">Здравей</div>
+                        <div class="answer-translit" id="testmeCorrectTranslit">Zdravey</div>
+                        <button class="speak-btn-kids" onclick="playCorrectAnswer()">🔊 Hear it!</button>
+                    </div>
+
+                    <div class="testme-self-check">
+                        <p class="check-prompt">Did you say it right?</p>
+                        <div class="check-buttons">
+                            <button class="btn-kids success-kids" onclick="testMeCorrect()">
+                                ✓ Got it!
+                            </button>
+                            <button class="btn-kids secondary-kids" onclick="testMePractice()">
+                                Practice More
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Next Button -->
+                <button id="testmeNextBtn" class="btn-kids primary-kids hidden" onclick="nextTestMeQuestion()">
+                    Next Word! →
+                </button>
+            </div>
+        </section>
+
+        <!-- Settings Modal (simplified for kids) -->
+        <div id="settingsModal" class="modal hidden">
+            <div class="modal-content modal-kids">
+                <div class="modal-header">
+                    <h2>⚙️ Settings</h2>
+                    <button class="close-btn-kids" onclick="closeSettings()">✕</button>
+                </div>
+                <div class="settings-body">
+                    <div class="setting-item-kids">
+                        <p style="font-size: 14px; color: #666; margin-bottom: 8px;">Current user: <strong id="settingsCurrentUser"></strong></p>
+                    </div>
+                    <div class="setting-item-kids">
+                        <button class="btn-kids secondary-kids" onclick="exportProfile()">
+                            📤 Export Profile
+                        </button>
+                    </div>
+                    <div class="setting-item-kids">
+                        <button class="btn-kids secondary-kids" onclick="migrateDefaultTo()">
+                            📋 Copy Default → Other User
+                        </button>
+                    </div>
+                    <div class="setting-item-kids">
+                        <button class="btn-kids danger-kids" onclick="resetProgress()">
+                            🔄 Start Over
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inbox Modal -->
+        <div id="inboxModal" class="modal hidden">
+            <div class="modal-content modal-kids inbox-modal">
+                <div class="modal-header">
+                    <h2>💌 Messages</h2>
+                    <button class="close-btn-kids" onclick="closeInbox()">✕</button>
+                </div>
+                <div id="inboxMessages" class="inbox-body">
+                    <!-- Messages loaded by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Send Message Modal -->
+        <div id="sendMessageModal" class="modal hidden">
+            <div class="modal-content modal-kids send-modal">
+                <div class="modal-header">
+                    <h2>💌 Send Message</h2>
+                    <button class="close-btn-kids" onclick="closeSendMessage()">✕</button>
+                </div>
+                <div class="send-message-body">
+                    <div class="form-group-kids">
+                        <label>To:</label>
+                        <input type="text" id="messageRecipient" placeholder="e.g. julian" class="input-kids">
+                    </div>
+
+                    <!-- Voice Message -->
+                    <div class="form-group-kids">
+                        <label>Voice Message:</label>
+                        <button id="voiceMsgRecordBtn" class="btn-kids voice-record-btn" onclick="toggleVoiceMsgRecording()">
+                            🎤 Record Voice Message
+                        </button>
+                        <div id="voiceMsgPlayback" class="voice-playback hidden">
+                            <button class="btn-kids" onclick="playVoiceMsgPreview()">▶️ Play</button>
+                            <span class="voice-ready">✓ Voice ready to send</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group-kids">
+                        <label>Or type a message:</label>
+                        <textarea id="messageText" placeholder="Write your message..." class="input-kids textarea-kids" rows="2"></textarea>
+                    </div>
+                    <div class="quick-messages">
+                        <p>Quick messages:</p>
+                        <button class="btn-kids quick-msg" onclick="document.getElementById('messageText').value='Great job learning Bulgarian! 🌟'">🌟 Great job!</button>
+                        <button class="btn-kids quick-msg" onclick="document.getElementById('messageText').value='Baba is so proud of you! 💕'">💕 So proud!</button>
+                        <button class="btn-kids quick-msg" onclick="document.getElementById('messageText').value='Keep practicing! You\'re doing amazing! 🎉'">🎉 Keep going!</button>
+                    </div>
+                    <button class="btn-kids primary-kids" onclick="submitMessage()">
+                        Send Message 💌
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin View Modal (for grandparents) -->
+        <div id="adminViewModal" class="modal hidden">
+            <div class="modal-content modal-kids admin-modal">
+                <div class="modal-header">
+                    <h2>👀 View Progress</h2>
+                    <button class="close-btn-kids" onclick="closeAdminView()">✕</button>
+                </div>
+                <div class="admin-view-body">
+                    <div class="form-group-kids">
+                        <label>View progress for:</label>
+                        <div class="admin-search">
+                            <input type="text" id="adminTargetUser" placeholder="e.g. julian" class="input-kids">
+                            <button class="btn-kids primary-kids" onclick="loadAdminData()">View</button>
+                        </div>
+                    </div>
+                    <div id="adminViewContent">
+                        <p>Enter a user name above to see their progress.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TV Store Modal -->
+        <div id="tvStoreModal" class="modal hidden">
+            <div class="modal-content modal-kids tv-store-modal">
+                <div class="modal-header">
+                    <h2>📺 TV Store!</h2>
+                    <button class="close-btn-kids" onclick="closeTvStore()">✕</button>
+                </div>
+                <div class="tv-store-body">
+                    <div class="store-balance">
+                        <div class="balance-points">
+                            <img src="baba.png" class="baba-img-small" alt="Baba">
+                            <span id="storePointsBalance">0</span> Baba Points
+                        </div>
+                        <div class="balance-tv">
+                            📺 <span id="storeTvBalance">0</span> min available
+                        </div>
+                    </div>
+
+                    <div class="store-section">
+                        <h3>🛒 Buy TV Time</h3>
+                        <div class="store-items">
+                            <div class="store-item" onclick="buyTvTime(50, 15)">
+                                <div class="item-tv">📺 15 min</div>
+                                <div class="item-price">
+                                    <img src="baba.png" class="baba-img-tiny" alt="Baba"> 50 pts
+                                </div>
+                                <button class="btn-kids buy-btn" id="buy50">Buy</button>
+                            </div>
+                            <div class="store-item" onclick="buyTvTime(100, 30)">
+                                <div class="item-tv">📺 30 min</div>
+                                <div class="item-price">
+                                    <img src="baba.png" class="baba-img-tiny" alt="Baba"> 100 pts
+                                </div>
+                                <button class="btn-kids buy-btn" id="buy100">Buy</button>
+                            </div>
+                            <div class="store-item best-deal" onclick="buyTvTime(200, 60)">
+                                <div class="best-deal-badge">Best Deal!</div>
+                                <div class="item-tv">📺 60 min</div>
+                                <div class="item-price">
+                                    <img src="baba.png" class="baba-img-tiny" alt="Baba"> 200 pts
+                                </div>
+                                <button class="btn-kids buy-btn" id="buy200">Buy</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="store-section redeem-section" id="redeemSection">
+                        <h3>🎬 Use TV Time</h3>
+                        <p class="redeem-hint">Show this to Mom or Dad!</p>
+                        <button class="btn-kids redeem-btn" onclick="redeemTvTime()">
+                            📺 Use My TV Time
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TV Voucher Modal (shown to parent) -->
+        <div id="tvVoucherModal" class="modal hidden">
+            <div class="modal-content modal-kids tv-voucher-modal">
+                <div class="voucher-content">
+                    <div class="voucher-header">🎉 TV Time Voucher! 🎉</div>
+                    <div class="voucher-mascot">📺🐻</div>
+                    <div class="voucher-amount">
+                        <span id="voucherMinutes">0</span> minutes
+                    </div>
+                    <div class="voucher-message">
+                        <span id="voucherUser">Julian</span> earned this TV time by learning Bulgarian!
+                    </div>
+                    <div class="voucher-timestamp" id="voucherTime"></div>
+                    <button class="btn-kids primary-kids" onclick="closeVoucher()">
+                        ✓ TV Time Approved!
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stickers/Achievements Modal -->
+        <div id="achievementsModal" class="modal hidden">
+            <div class="modal-content modal-kids">
+                <div class="modal-header">
+                    <h2>🌟 My Stickers!</h2>
+                    <button class="close-btn-kids" onclick="closeAchievements()">✕</button>
+                </div>
+                <div id="achievementsList" class="stickers-grid"></div>
+            </div>
+        </div>
+
+        <!-- Level Up Modal (kid-friendly) -->
+        <div id="levelUpModal" class="modal hidden">
+            <div class="modal-content level-up-kids">
+                <div class="confetti">🎉🎊🎉🎊🎉</div>
+                <div class="mascot-celebrate">🐻</div>
+                <h2>AMAZING!</h2>
+                <div class="new-star-display">
+                    ⭐ You got a new star! ⭐
+                </div>
+                <div class="baba-says">
+                    <img src="baba.png" class="baba-img-small" alt="Baba"> Baba is so proud!
+                </div>
+                <button class="btn-kids primary-kids" onclick="closeLevelUp()">YAY!</button>
+            </div>
+        </div>
+
+        <!-- Correct Answer Celebration -->
+        <div id="correctCelebration" class="celebration hidden">
+            <div class="celebration-content">
+                <span class="celebration-emoji">🎉</span>
+                <span class="celebration-text">Great job!</span>
+            </div>
+        </div>
+
+        <!-- Milestone Celebration Modal -->
+        <div id="milestoneModal" class="modal hidden">
+            <div class="modal-content milestone-modal">
+                <div class="milestone-confetti">🎊✨🎉✨🎊</div>
+                <div class="milestone-mascot">🐻🏆</div>
+                <h2 id="milestoneTitle">Amazing!</h2>
+                <div class="milestone-count" id="milestoneCount">10</div>
+                <div class="milestone-label">words mastered!</div>
+                <div class="milestone-message" id="milestoneMessage">You're doing incredible!</div>
+                <button class="btn-kids primary-kids" onclick="closeMilestone()">
+                    Keep Going! 🚀
+                </button>
+            </div>
+        </div>
+
+        <!-- Admin Modal -->
+        <div id="adminModal" class="modal hidden">
+            <div class="modal-content modal-kids admin-modal">
+                <div class="modal-header">
+                    <h2>📝 Manage Words</h2>
+                    <button class="close-btn-kids" onclick="closeAdmin()">✕</button>
+                </div>
+                <div class="admin-body">
+                    <div id="wordsList" class="words-list-admin">
+                        <!-- Words populated by JS -->
+                    </div>
+                    <div id="noWordsMsg" class="no-words-msg hidden">
+                        No words yet. Add some!
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Word Modal -->
+        <div id="editWordModal" class="modal hidden">
+            <div class="modal-content modal-kids edit-word-modal">
+                <div class="modal-header">
+                    <h2>✏️ Edit Word</h2>
+                    <button class="close-btn-kids" onclick="closeEditWord()">✕</button>
+                </div>
+                <div class="add-word-body">
+                    <input type="hidden" id="editWordId">
+
+                    <div class="form-group-kids">
+                        <label>English Transliteration</label>
+                        <input type="text" id="editWordTranslit" placeholder="e.g. zdravey" autocomplete="off" oninput="autoConvertToCyrillic()">
+                    </div>
+
+                    <div class="form-group-kids">
+                        <label>Bulgarian Spelling (auto-generated)</label>
+                        <input type="text" id="editWordCyrillic" placeholder="Auto-filled from transliteration">
+                    </div>
+
+                    <div class="form-group-kids">
+                        <label>English Meaning</label>
+                        <input type="text" id="editWordMeaning" placeholder="e.g. hello 👋" autocomplete="off">
+                    </div>
+
+                    <div class="form-group-kids">
+                        <label>Audio</label>
+                        <div id="editAudioStatus" class="audio-status">No audio</div>
+                        <div class="audio-actions">
+                            <button class="btn-kids secondary-kids" onclick="playEditAudio()" id="playEditAudioBtn" style="display:none;">▶️ Play</button>
+                            <button class="btn-kids secondary-kids" onclick="reRecordAudio()">🎤 Record New</button>
+                        </div>
+                    </div>
+
+                    <div class="edit-buttons">
+                        <button class="btn-kids primary-kids" onclick="saveEditedWord()">
+                            💾 Save Changes
+                        </button>
+                        <button class="btn-kids danger-kids" onclick="deleteWord()">
+                            🗑️ Delete Word
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add New Word Modal -->
+        <div id="addWordModal" class="modal hidden">
+            <div class="modal-content modal-kids add-word-modal">
+                <div class="modal-header">
+                    <h2>➕ Add New Word</h2>
+                    <button class="close-btn-kids" onclick="closeAddWord()">✕</button>
+                </div>
+                <div class="add-word-body">
+                    <div class="form-group-kids">
+                        <label>English Transliteration</label>
+                        <input type="text" id="newWordTranslit" placeholder="e.g. zdravey" autocomplete="off" oninput="autoConvertNewWord()">
+                    </div>
+
+                    <div class="form-group-kids">
+                        <label>Bulgarian Spelling (auto-generated)</label>
+                        <input type="text" id="newWordCyrillic" placeholder="Auto-filled from transliteration">
+                    </div>
+
+                    <div class="form-group-kids">
+                        <label>English Meaning</label>
+                        <input type="text" id="newWordMeaning" placeholder="e.g. hello 👋" autocomplete="off">
+                    </div>
+
+                    <div class="form-group-kids">
+                        <label>Record Pronunciation</label>
+                        <div class="audio-recorder">
+                            <button id="recordBtn" class="record-btn" onclick="toggleRecording()">
+                                <span id="recordIcon">🎤</span>
+                                <span id="recordText">Tap to Record</span>
+                            </button>
+                            <div id="recordingIndicator" class="recording-indicator hidden">
+                                <span class="recording-dot"></span>
+                                Recording...
+                            </div>
+                            <div id="audioPlayback" class="audio-playback hidden">
+                                <button class="play-btn" onclick="playRecordedAudio()">▶️ Play</button>
+                                <button class="delete-audio-btn" onclick="deleteRecording()">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-kids primary-kids" onclick="saveNewWord()">
+                        ✨ Add Word!
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js?v=20250302c"></script>
+</body>
+</html>
