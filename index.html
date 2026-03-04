@@ -10,17 +10,49 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Bulgarian for Kids!</title>
-    <link rel="stylesheet" href="styles.css?v=20250302c">
+    <link rel="stylesheet" href="styles.css?v=20250304">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <div id="app">
+        <!-- Login Screen -->
+        <section id="loginScreen" class="login-screen">
+            <div class="login-container">
+                <div class="login-mascot">🐻</div>
+                <h1 class="login-title">Bulgarian for Kids!</h1>
+                <p class="login-subtitle">Who's learning today?</p>
+
+                <div class="login-form">
+                    <input type="text" id="loginNameInput" class="login-input" placeholder="Type your name..." autocomplete="off" maxlength="20">
+                    <button class="btn-kids primary-kids login-btn" onclick="handleLogin()">
+                        Let's Go! 🚀
+                    </button>
+                </div>
+
+                <div class="recent-users" id="recentUsersSection">
+                    <p class="recent-label">Or pick your name:</p>
+                    <div class="recent-users-list" id="recentUsersList">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <div class="login-footer">
+                    <img src="baba.png" class="baba-img-small" alt="Baba">
+                    <span>Learn Bulgarian with Baba!</span>
+                </div>
+            </div>
+        </section>
+
         <!-- Header -->
-        <header class="header">
+        <header class="header hidden" id="mainHeader">
             <button id="backBtn" class="back-btn hidden" onclick="goHome()">←</button>
             <h1 id="headerTitle">
                 <span class="mascot">🐻</span> <span id="appTitle">Learn Bulgarian!</span>
             </h1>
+            <div class="header-user" onclick="showUserMenu()">
+                <span id="headerUserName">User</span>
+                <span class="user-dropdown">▼</span>
+            </div>
             <button class="header-btn inbox-btn" onclick="openInbox()">
                 💌
                 <span id="inboxBadge" class="inbox-badge hidden">0</span>
@@ -29,8 +61,18 @@
             <button class="header-btn" onclick="openSettings()">⚙️</button>
         </header>
 
+        <!-- User Menu Dropdown -->
+        <div id="userMenuDropdown" class="user-menu-dropdown hidden">
+            <div class="user-menu-item" onclick="switchUser()">
+                <span>🔄</span> Switch User
+            </div>
+            <div class="user-menu-item" onclick="handleLogout()">
+                <span>👋</span> Log Out
+            </div>
+        </div>
+
         <!-- Home Screen -->
-        <main id="homeScreen" class="content">
+        <main id="homeScreen" class="content hidden">
             <!-- Mascot Welcome -->
             <div class="mascot-welcome">
                 <div class="mascot-big">🐻</div>
@@ -151,28 +193,53 @@
                 <div id="alphabetProgressBar" class="progress-fill-kids"></div>
             </div>
 
-            <div id="alphabetCard" class="flashcard-kids">
-                <div class="flashcard-inner">
-                    <div class="flashcard-front">
-                        <div class="question-prompt-kids">What sound?</div>
-                        <div class="letter-display-kids" id="alphabetLetter">А а</div>
-                        <button class="speak-btn-kids" onclick="speakCurrentLetter()">🔊 Hear it!</button>
-                    </div>
-                    <div class="flashcard-back">
-                        <div class="letter-display-kids" id="answerLetter">А а</div>
-                        <div class="sound-display-kids" id="answerSound">ah</div>
-                        <div class="sound-hint-kids" id="answerHint">like "a" in "father"</div>
-                        <button class="speak-btn-kids" onclick="speakCurrentLetter()">🔊 Again!</button>
-                    </div>
+            <!-- Letter Card with Picture -->
+            <div id="alphabetCard" class="alphabet-card-enhanced">
+                <div class="letter-card-front" id="letterCardFront">
+                    <div class="letter-picture" id="letterPicture">🍎</div>
+                    <div class="letter-display-big" id="alphabetLetter">А а</div>
+                    <div class="letter-word" id="letterWord">ябълка (apple)</div>
+                    <button class="speak-btn-kids hear-btn" onclick="speakCurrentLetter()">
+                        🔊 Hear it!
+                    </button>
+                </div>
+
+                <!-- Answer Feedback Overlay -->
+                <div id="answerFeedback" class="answer-feedback hidden">
+                    <div class="feedback-icon" id="feedbackIcon">✓</div>
+                    <div class="feedback-text" id="feedbackText">Correct!</div>
+                    <div class="feedback-sound" id="feedbackSound">ah</div>
+                    <div class="feedback-hint" id="feedbackHint">like "a" in "father"</div>
                 </div>
             </div>
 
+            <!-- Question Prompt -->
+            <div class="question-prompt-box">
+                <span class="question-text">What sound does this letter make?</span>
+            </div>
+
+            <!-- Two Choices -->
             <div class="choices-grid-kids" id="alphabetChoices">
                 <!-- Choices populated by JS -->
             </div>
 
+            <!-- Record Your Voice Section -->
+            <div class="record-practice-section" id="recordPracticeSection">
+                <p class="practice-label">Practice saying it:</p>
+                <button class="record-practice-btn" id="alphabetRecordBtn" onclick="toggleAlphabetRecording()">
+                    <span id="alphabetRecordIcon">🎤</span>
+                    <span id="alphabetRecordText">Tap to record</span>
+                </button>
+                <div id="alphabetRecordingIndicator" class="recording-indicator hidden">
+                    <span class="recording-dot"></span> Recording...
+                </div>
+                <div id="alphabetPlayback" class="audio-playback hidden">
+                    <button class="play-btn" onclick="playAlphabetRecording()">▶️ Play mine</button>
+                </div>
+            </div>
+
             <button id="nextLetterBtn" class="btn-kids primary-kids hidden" onclick="goToNextLetter()">
-                Next! →
+                Next Letter! →
             </button>
         </section>
 
@@ -634,6 +701,49 @@
         </div>
     </div>
 
-    <script src="app.js?v=20250302c"></script>
+        <!-- Admin Dashboard (for admin user) -->
+        <section id="adminDashboard" class="content module-screen hidden">
+            <div class="admin-dashboard-header">
+                <h2>📊 Admin Dashboard</h2>
+                <p>Monitor all learners</p>
+            </div>
+
+            <div class="admin-user-list" id="adminUserList">
+                <!-- User cards populated by JS -->
+            </div>
+
+            <div id="adminUserDetail" class="admin-user-detail hidden">
+                <div class="detail-header">
+                    <button class="back-btn-small" onclick="closeUserDetail()">← Back</button>
+                    <h3 id="detailUserName">User Details</h3>
+                </div>
+
+                <div class="detail-stats" id="detailStats">
+                    <!-- Stats populated by JS -->
+                </div>
+
+                <div class="detail-section">
+                    <h4>📚 Words Learned</h4>
+                    <div id="detailWordsList" class="detail-words-list">
+                        <!-- Words populated by JS -->
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h4>📈 Recent Activity</h4>
+                    <div id="detailActivityList" class="detail-activity-list">
+                        <!-- Activity populated by JS -->
+                    </div>
+                </div>
+
+                <div class="detail-actions">
+                    <button class="btn-kids secondary-kids" onclick="sendMessageToUser()">
+                        💌 Send Message
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    <script src="app.js?v=20250304"></script>
 </body>
 </html>

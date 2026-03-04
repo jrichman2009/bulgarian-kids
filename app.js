@@ -4,20 +4,42 @@
 const SUPABASE_URL = 'https://wnjoiczniapfydbufhaq.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_nfQ-5zgBDb3OUAsR38ZRLA_AHY0TQXg';
 
-// Get user from URL parameter (e.g., ?user=mila)
-function getCurrentUser() {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('user') || 'default';
+// ============ User Authentication ============
+const ADMIN_USER = 'admin';
+let CURRENT_USER = null;
+
+function getStoredUser() {
+    return localStorage.getItem('bulgarian_kids_current_user');
 }
 
-const CURRENT_USER = getCurrentUser();
+function setStoredUser(username) {
+    localStorage.setItem('bulgarian_kids_current_user', username);
+    CURRENT_USER = username;
+}
+
+function getRecentUsers() {
+    const stored = localStorage.getItem('bulgarian_kids_recent_users');
+    return stored ? JSON.parse(stored) : [];
+}
+
+function addRecentUser(username) {
+    let recent = getRecentUsers();
+    recent = recent.filter(u => u !== username);
+    recent.unshift(username);
+    recent = recent.slice(0, 5); // Keep only 5 recent users
+    localStorage.setItem('bulgarian_kids_recent_users', JSON.stringify(recent));
+}
+
+function isAdmin() {
+    return CURRENT_USER === ADMIN_USER;
+}
 
 let db = null;
 function initSupabase() {
     try {
         if (window.supabase && window.supabase.createClient) {
             db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            console.log('Supabase initialized for user:', CURRENT_USER);
+            console.log('Supabase initialized');
             return true;
         }
     } catch (err) {
@@ -26,38 +48,38 @@ function initSupabase() {
     return false;
 }
 
-// ============ Alphabet (same as adult version) ============
+// ============ Alphabet with Pictures ============
 const ALPHABET = [
-    { letter: 'А а', soundBg: 'ааа', soundEn: 'ahh', phonetic: 'ah', hint: 'like "a" in "father"' },
-    { letter: 'Б б', soundBg: 'бъ', soundEn: 'buh', phonetic: 'b', hint: 'like "b" in "boy"' },
-    { letter: 'В в', soundBg: 'въ', soundEn: 'vuh', phonetic: 'v', hint: 'like "v" in "van"' },
-    { letter: 'Г г', soundBg: 'гъ', soundEn: 'guh', phonetic: 'g', hint: 'like "g" in "go"' },
-    { letter: 'Д д', soundBg: 'дъ', soundEn: 'duh', phonetic: 'd', hint: 'like "d" in "dog"' },
-    { letter: 'Е е', soundBg: 'еее', soundEn: 'eh', phonetic: 'e', hint: 'like "e" in "bed"' },
-    { letter: 'Ж ж', soundBg: 'жъ', soundEn: 'zhuh', phonetic: 'zh', hint: 'like "s" in "measure"' },
-    { letter: 'З з', soundBg: 'зъ', soundEn: 'zuh', phonetic: 'z', hint: 'like "z" in "zoo"' },
-    { letter: 'И и', soundBg: 'иии', soundEn: 'eee', phonetic: 'ee', hint: 'like "ee" in "see"' },
-    { letter: 'Й й', soundBg: 'ий', soundEn: 'y', phonetic: 'y', hint: 'like "y" in "yes"' },
-    { letter: 'К к', soundBg: 'къ', soundEn: 'kuh', phonetic: 'k', hint: 'like "k" in "kite"' },
-    { letter: 'Л л', soundBg: 'лъ', soundEn: 'luh', phonetic: 'l', hint: 'like "l" in "love"' },
-    { letter: 'М м', soundBg: 'мъ', soundEn: 'muh', phonetic: 'm', hint: 'like "m" in "mom"' },
-    { letter: 'Н н', soundBg: 'нъ', soundEn: 'nuh', phonetic: 'n', hint: 'like "n" in "no"' },
-    { letter: 'О о', soundBg: 'ооо', soundEn: 'oh', phonetic: 'o', hint: 'like "o" in "more"' },
-    { letter: 'П п', soundBg: 'пъ', soundEn: 'puh', phonetic: 'p', hint: 'like "p" in "pen"' },
-    { letter: 'Р р', soundBg: 'ръ', soundEn: 'rruh', phonetic: 'r', hint: 'rolled "r"' },
-    { letter: 'С с', soundBg: 'съ', soundEn: 'suh', phonetic: 's', hint: 'like "s" in "sun"' },
-    { letter: 'Т т', soundBg: 'тъ', soundEn: 'tuh', phonetic: 't', hint: 'like "t" in "top"' },
-    { letter: 'У у', soundBg: 'ууу', soundEn: 'ooo', phonetic: 'oo', hint: 'like "oo" in "moon"' },
-    { letter: 'Ф ф', soundBg: 'фъ', soundEn: 'fuh', phonetic: 'f', hint: 'like "f" in "fun"' },
-    { letter: 'Х х', soundBg: 'хъ', soundEn: 'huh', phonetic: 'h', hint: 'like "h" in "house"' },
-    { letter: 'Ц ц', soundBg: 'цъ', soundEn: 'tsuh', phonetic: 'ts', hint: 'like "ts" in "cats"' },
-    { letter: 'Ч ч', soundBg: 'чъ', soundEn: 'chuh', phonetic: 'ch', hint: 'like "ch" in "cheese"' },
-    { letter: 'Ш ш', soundBg: 'шъ', soundEn: 'shuh', phonetic: 'sh', hint: 'like "sh" in "ship"' },
-    { letter: 'Щ щ', soundBg: 'щъ', soundEn: 'shtuh', phonetic: 'sht', hint: 'like "sht"' },
-    { letter: 'Ъ ъ', soundBg: 'ъъъ', soundEn: 'uh', phonetic: 'uh', hint: 'like "u" in "but"' },
-    { letter: 'Ь ь', soundBg: 'ер малък', soundEn: 'soft', phonetic: '(soft)', hint: 'makes letters soft' },
-    { letter: 'Ю ю', soundBg: 'юу', soundEn: 'yoo', phonetic: 'yu', hint: 'like "u" in "cute"' },
-    { letter: 'Я я', soundBg: 'яа', soundEn: 'yah', phonetic: 'ya', hint: 'like "ya" in "yard"' },
+    { letter: 'А а', soundBg: 'ааа', soundEn: 'ahh', phonetic: 'ah', hint: 'like "a" in "father"', picture: '🍎', word: 'ябълка', wordEn: 'apple' },
+    { letter: 'Б б', soundBg: 'бъ', soundEn: 'buh', phonetic: 'b', hint: 'like "b" in "boy"', picture: '🐻', word: 'баба', wordEn: 'grandma' },
+    { letter: 'В в', soundBg: 'въ', soundEn: 'vuh', phonetic: 'v', hint: 'like "v" in "van"', picture: '🌊', word: 'вълна', wordEn: 'wave' },
+    { letter: 'Г г', soundBg: 'гъ', soundEn: 'guh', phonetic: 'g', hint: 'like "g" in "go"', picture: '🍇', word: 'грозде', wordEn: 'grapes' },
+    { letter: 'Д д', soundBg: 'дъ', soundEn: 'duh', phonetic: 'd', hint: 'like "d" in "dog"', picture: '🏠', word: 'дом', wordEn: 'house' },
+    { letter: 'Е е', soundBg: 'еее', soundEn: 'eh', phonetic: 'e', hint: 'like "e" in "bed"', picture: '🦔', word: 'еж', wordEn: 'hedgehog' },
+    { letter: 'Ж ж', soundBg: 'жъ', soundEn: 'zhuh', phonetic: 'zh', hint: 'like "s" in "measure"', picture: '🐸', word: 'жаба', wordEn: 'frog' },
+    { letter: 'З з', soundBg: 'зъ', soundEn: 'zuh', phonetic: 'z', hint: 'like "z" in "zoo"', picture: '⭐', word: 'звезда', wordEn: 'star' },
+    { letter: 'И и', soundBg: 'иии', soundEn: 'eee', phonetic: 'ee', hint: 'like "ee" in "see"', picture: '🎮', word: 'игра', wordEn: 'game' },
+    { letter: 'Й й', soundBg: 'ий', soundEn: 'y', phonetic: 'y', hint: 'like "y" in "yes"', picture: '🥛', word: 'йогурт', wordEn: 'yogurt' },
+    { letter: 'К к', soundBg: 'къ', soundEn: 'kuh', phonetic: 'k', hint: 'like "k" in "kite"', picture: '🐱', word: 'котка', wordEn: 'cat' },
+    { letter: 'Л л', soundBg: 'лъ', soundEn: 'luh', phonetic: 'l', hint: 'like "l" in "love"', picture: '🍋', word: 'лимон', wordEn: 'lemon' },
+    { letter: 'М м', soundBg: 'мъ', soundEn: 'muh', phonetic: 'm', hint: 'like "m" in "mom"', picture: '🐭', word: 'мишка', wordEn: 'mouse' },
+    { letter: 'Н н', soundBg: 'нъ', soundEn: 'nuh', phonetic: 'n', hint: 'like "n" in "no"', picture: '🌙', word: 'нощ', wordEn: 'night' },
+    { letter: 'О о', soundBg: 'ооо', soundEn: 'oh', phonetic: 'o', hint: 'like "o" in "more"', picture: '☁️', word: 'облак', wordEn: 'cloud' },
+    { letter: 'П п', soundBg: 'пъ', soundEn: 'puh', phonetic: 'p', hint: 'like "p" in "pen"', picture: '🐦', word: 'птица', wordEn: 'bird' },
+    { letter: 'Р р', soundBg: 'ръ', soundEn: 'rruh', phonetic: 'r', hint: 'rolled "r"', picture: '🐟', word: 'риба', wordEn: 'fish' },
+    { letter: 'С с', soundBg: 'съ', soundEn: 'suh', phonetic: 's', hint: 'like "s" in "sun"', picture: '☀️', word: 'слънце', wordEn: 'sun' },
+    { letter: 'Т т', soundBg: 'тъ', soundEn: 'tuh', phonetic: 't', hint: 'like "t" in "top"', picture: '🚂', word: 'трен', wordEn: 'train' },
+    { letter: 'У у', soundBg: 'ууу', soundEn: 'ooo', phonetic: 'oo', hint: 'like "oo" in "moon"', picture: '🦆', word: 'утка', wordEn: 'duck' },
+    { letter: 'Ф ф', soundBg: 'фъ', soundEn: 'fuh', phonetic: 'f', hint: 'like "f" in "fun"', picture: '🎆', word: 'фойерверк', wordEn: 'fireworks' },
+    { letter: 'Х х', soundBg: 'хъ', soundEn: 'huh', phonetic: 'h', hint: 'like "h" in "house"', picture: '🍞', word: 'хляб', wordEn: 'bread' },
+    { letter: 'Ц ц', soundBg: 'цъ', soundEn: 'tsuh', phonetic: 'ts', hint: 'like "ts" in "cats"', picture: '🌸', word: 'цвете', wordEn: 'flower' },
+    { letter: 'Ч ч', soundBg: 'чъ', soundEn: 'chuh', phonetic: 'ch', hint: 'like "ch" in "cheese"', picture: '☂️', word: 'чадър', wordEn: 'umbrella' },
+    { letter: 'Ш ш', soundBg: 'шъ', soundEn: 'shuh', phonetic: 'sh', hint: 'like "sh" in "ship"', picture: '🎩', word: 'шапка', wordEn: 'hat' },
+    { letter: 'Щ щ', soundBg: 'щъ', soundEn: 'shtuh', phonetic: 'sht', hint: 'like "sht"', picture: '🦑', word: 'щука', wordEn: 'pike fish' },
+    { letter: 'Ъ ъ', soundBg: 'ъъъ', soundEn: 'uh', phonetic: 'uh', hint: 'like "u" in "but"', picture: '🏔️', word: 'връх', wordEn: 'peak' },
+    { letter: 'Ь ь', soundBg: 'ер малък', soundEn: 'soft', phonetic: '(soft)', hint: 'makes letters soft', picture: '🧈', word: 'мек', wordEn: 'soft' },
+    { letter: 'Ю ю', soundBg: 'юу', soundEn: 'yoo', phonetic: 'yu', hint: 'like "u" in "cute"', picture: '🎠', word: 'юла', wordEn: 'spinning top' },
+    { letter: 'Я я', soundBg: 'яа', soundEn: 'yah', phonetic: 'ya', hint: 'like "ya" in "yard"', picture: '🍳', word: 'яйце', wordEn: 'egg' },
 ];
 
 
@@ -199,11 +221,21 @@ function checkDailyReset() {
 
 // ============ Navigation ============
 function goHome() {
-    document.getElementById('homeScreen').classList.remove('hidden');
     document.querySelectorAll('.module-screen').forEach(m => m.classList.add('hidden'));
     document.getElementById('backBtn').classList.add('hidden');
-    const userName = CURRENT_USER === 'default' ? '' : `${CURRENT_USER}'s `;
-    document.getElementById('appTitle').textContent = `${userName}Bulgarian!`;
+
+    // Admin users go to admin dashboard
+    if (isAdmin()) {
+        document.getElementById('adminDashboard').classList.remove('hidden');
+        document.getElementById('backBtn').classList.remove('hidden');
+        document.getElementById('headerTitle').innerHTML = '<span class="mascot">📊</span> Admin Dashboard';
+        loadAdminDashboard();
+        return;
+    }
+
+    document.getElementById('homeScreen').classList.remove('hidden');
+    const displayName = CURRENT_USER ? CURRENT_USER.charAt(0).toUpperCase() + CURRENT_USER.slice(1) : '';
+    document.getElementById('appTitle').textContent = `${displayName}'s Bulgarian!`;
     state.currentModule = null;
     updateHomeScreen();
 }
@@ -520,10 +552,13 @@ function initSRS(idx) {
 }
 
 function setupAlphabetQuestion() {
-    const card = document.getElementById('alphabetCard');
-    card.classList.remove('flipped');
+    // Reset UI
     document.getElementById('nextLetterBtn').classList.add('hidden');
     document.getElementById('alphabetChoices').classList.remove('hidden');
+    document.getElementById('answerFeedback').classList.add('hidden');
+    document.getElementById('letterCardFront').style.display = 'block';
+    document.getElementById('recordPracticeSection').classList.add('hidden');
+    document.getElementById('alphabetPlayback').classList.add('hidden');
 
     // Simple: Start with first 5 letters, unlock more as mastered
     if (state.alphabet.introduced.length === 0) {
@@ -555,11 +590,14 @@ function setupAlphabetQuestion() {
     state.alphabet.currentQuestion = questionIdx;
     state.alphabet.choices = choices;
 
-    // Update UI
+    // Update UI with picture and word
     document.getElementById('alphabetLetter').textContent = letter.letter;
-    document.getElementById('answerLetter').textContent = letter.letter;
-    document.getElementById('answerSound').textContent = letter.phonetic;
-    document.getElementById('answerHint').textContent = letter.hint;
+    document.getElementById('letterPicture').textContent = letter.picture || '📖';
+    document.getElementById('letterWord').textContent = `${letter.word} (${letter.wordEn})`;
+
+    // Setup feedback display
+    document.getElementById('feedbackSound').textContent = letter.phonetic;
+    document.getElementById('feedbackHint').textContent = letter.hint;
 
     const choicesContainer = document.getElementById('alphabetChoices');
     choicesContainer.innerHTML = choices.map((c, i) => `
@@ -574,8 +612,8 @@ function selectAlphabetChoice(choiceIndex) {
     const questionIdx = state.alphabet.currentQuestion;
     const letter = ALPHABET[questionIdx];
     const buttons = document.querySelectorAll('#alphabetChoices .choice-btn-kids');
-    const card = document.getElementById('alphabetCard');
     const srs = initSRS(questionIdx);
+    const feedback = document.getElementById('answerFeedback');
 
     buttons.forEach(b => b.disabled = true);
 
@@ -587,13 +625,15 @@ function selectAlphabetChoice(choiceIndex) {
         }
     });
 
-    const backCard = card.querySelector('.flashcard-back');
-    backCard.classList.remove('wrong');
+    // Setup feedback overlay
+    feedback.classList.remove('correct', 'wrong');
 
     if (choice.correct) {
         srs.correct++;
         playSound('correct');
-        showCelebration('Bravo! 🎉');
+        feedback.classList.add('correct');
+        document.getElementById('feedbackIcon').textContent = '✓';
+        document.getElementById('feedbackText').textContent = 'Correct!';
         incrementStreak();
         incrementDaily();
         addBabaPoints(1, 'Correct!');
@@ -619,7 +659,9 @@ function selectAlphabetChoice(choiceIndex) {
             if (state.alphabet.mastered.length >= 10) checkSticker('champion');
         }
     } else {
-        backCard.classList.add('wrong');
+        feedback.classList.add('wrong');
+        document.getElementById('feedbackIcon').textContent = '✗';
+        document.getElementById('feedbackText').textContent = 'Try again!';
         srs.correct = 0;
         playSound('wrong');
         resetStreak();
@@ -628,13 +670,19 @@ function selectAlphabetChoice(choiceIndex) {
 
     srs.lastSeen = Date.now();
     saveState();
-    syncUserProfile(); // Sync to cloud
+    syncUserProfile();
 
+    // Show feedback overlay and play sound
     setTimeout(() => {
-        card.classList.add('flipped');
+        feedback.classList.remove('hidden');
         document.getElementById('alphabetChoices').classList.add('hidden');
-        document.getElementById('nextLetterBtn').classList.remove('hidden');
         speakLetterWithHint(letter);
+
+        // Show recording practice and next button after delay
+        setTimeout(() => {
+            document.getElementById('recordPracticeSection').classList.remove('hidden');
+            document.getElementById('nextLetterBtn').classList.remove('hidden');
+        }, 1000);
     }, 500);
 }
 
@@ -656,6 +704,62 @@ function updateAlphabetProgress() {
 function speakCurrentLetter() {
     if (state.alphabet.currentQuestion !== null) {
         speakLetterWithHint(ALPHABET[state.alphabet.currentQuestion]);
+    }
+}
+
+// ============ Alphabet Recording ============
+let alphabetMediaRecorder = null;
+let alphabetAudioChunks = [];
+let alphabetRecordedBlob = null;
+
+async function toggleAlphabetRecording() {
+    const btn = document.getElementById('alphabetRecordBtn');
+    const indicator = document.getElementById('alphabetRecordingIndicator');
+    const playback = document.getElementById('alphabetPlayback');
+
+    if (alphabetMediaRecorder && alphabetMediaRecorder.state === 'recording') {
+        // Stop recording
+        alphabetMediaRecorder.stop();
+        btn.classList.remove('recording');
+        document.getElementById('alphabetRecordIcon').textContent = '🎤';
+        document.getElementById('alphabetRecordText').textContent = 'Tap to record';
+        indicator.classList.add('hidden');
+    } else {
+        // Start recording
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            alphabetMediaRecorder = new MediaRecorder(stream);
+            alphabetAudioChunks = [];
+
+            alphabetMediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) {
+                    alphabetAudioChunks.push(e.data);
+                }
+            };
+
+            alphabetMediaRecorder.onstop = () => {
+                alphabetRecordedBlob = new Blob(alphabetAudioChunks, { type: 'audio/webm' });
+                playback.classList.remove('hidden');
+                stream.getTracks().forEach(track => track.stop());
+            };
+
+            alphabetMediaRecorder.start();
+            btn.classList.add('recording');
+            document.getElementById('alphabetRecordIcon').textContent = '⏹️';
+            document.getElementById('alphabetRecordText').textContent = 'Tap to stop';
+            indicator.classList.remove('hidden');
+            playback.classList.add('hidden');
+        } catch (err) {
+            console.error('Recording error:', err);
+            alert('Could not access microphone');
+        }
+    }
+}
+
+function playAlphabetRecording() {
+    if (alphabetRecordedBlob) {
+        const audio = new Audio(URL.createObjectURL(alphabetRecordedBlob));
+        audio.play();
     }
 }
 
@@ -2589,22 +2693,341 @@ document.addEventListener('touchstart', unlockAudio, { once: true });
 document.addEventListener('click', unlockAudio, { once: true });
 
 document.addEventListener('DOMContentLoaded', async () => {
+    initSupabase();
+
+    // Check if user is already logged in
+    const storedUser = getStoredUser();
+    if (storedUser) {
+        CURRENT_USER = storedUser;
+        await initializeApp();
+    } else {
+        // Show login screen
+        showLoginScreen();
+    }
+});
+
+// ============ Login System ============
+function showLoginScreen() {
+    document.getElementById('loginScreen').classList.remove('hidden');
+    document.getElementById('mainHeader').classList.add('hidden');
+    document.getElementById('homeScreen').classList.add('hidden');
+
+    // Populate recent users
+    const recentUsers = getRecentUsers();
+    const recentSection = document.getElementById('recentUsersSection');
+    const recentList = document.getElementById('recentUsersList');
+
+    if (recentUsers.length > 0) {
+        recentSection.classList.remove('hidden');
+        recentList.innerHTML = recentUsers.map(user =>
+            `<button class="recent-user-btn" onclick="loginAs('${user}')">${user}</button>`
+        ).join('');
+    } else {
+        recentSection.classList.add('hidden');
+    }
+
+    // Focus input
+    setTimeout(() => {
+        document.getElementById('loginNameInput').focus();
+    }, 100);
+
+    // Handle enter key
+    document.getElementById('loginNameInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            handleLogin();
+        }
+    });
+}
+
+async function handleLogin() {
+    const nameInput = document.getElementById('loginNameInput');
+    const name = nameInput.value.trim().toLowerCase();
+
+    if (!name) {
+        nameInput.classList.add('error');
+        nameInput.placeholder = 'Please enter a name!';
+        setTimeout(() => {
+            nameInput.classList.remove('error');
+            nameInput.placeholder = 'Type your name...';
+        }, 2000);
+        return;
+    }
+
+    await loginAs(name);
+}
+
+async function loginAs(username) {
+    CURRENT_USER = username;
+    setStoredUser(username);
+    addRecentUser(username);
+
+    // Create or update user in database
+    if (db) {
+        try {
+            const { data: existing } = await db.from('users').select('*').eq('user_id', username).single();
+            if (!existing) {
+                // Create new user
+                await db.from('users').insert({
+                    user_id: username,
+                    baba_points: 0,
+                    current_streak: 0,
+                    best_streak: 0,
+                    daily_progress: 0,
+                    stickers: [],
+                    alphabet_mastered: 0,
+                    vocab_mastered: 0,
+                    last_active: new Date().toISOString()
+                });
+            }
+        } catch (err) {
+            console.log('User check error:', err);
+        }
+    }
+
+    await initializeApp();
+}
+
+async function initializeApp() {
     try {
-        // Show user name in header
-        const userName = CURRENT_USER === 'default' ? '' : `${CURRENT_USER}'s `;
-        document.getElementById('appTitle').textContent = `${userName}Bulgarian!`;
+        // Hide login, show app
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('mainHeader').classList.remove('hidden');
+        document.getElementById('homeScreen').classList.remove('hidden');
+
+        // Update header with user name
+        const displayName = CURRENT_USER.charAt(0).toUpperCase() + CURRENT_USER.slice(1);
+        document.getElementById('appTitle').textContent = `${displayName}'s Bulgarian!`;
+        document.getElementById('headerUserName').textContent = displayName;
 
         loadState();
-        if (initSupabase()) {
+
+        if (db) {
             await loadWordsFromDatabase();
             await loadUserProfile();
             await checkUnreadMessages();
-            // Log session start and sync profile
             logActivity('session_start', null, { user: CURRENT_USER });
             syncUserProfile();
         }
+
+        updateHomeScreen();
+
+        // If admin user, show admin dashboard option
+        if (isAdmin()) {
+            showAdminMode();
+        }
     } catch (err) {
         console.error('Init error:', err);
-        loadState(); // Fallback to local state
+        loadState();
     }
-});
+}
+
+function showUserMenu() {
+    const dropdown = document.getElementById('userMenuDropdown');
+    dropdown.classList.toggle('hidden');
+
+    // Close on click outside
+    setTimeout(() => {
+        document.addEventListener('click', function closeMenu(e) {
+            if (!e.target.closest('.header-user') && !e.target.closest('.user-menu-dropdown')) {
+                dropdown.classList.add('hidden');
+                document.removeEventListener('click', closeMenu);
+            }
+        });
+    }, 10);
+}
+
+function switchUser() {
+    document.getElementById('userMenuDropdown').classList.add('hidden');
+    localStorage.removeItem('bulgarian_kids_current_user');
+    CURRENT_USER = null;
+    showLoginScreen();
+}
+
+function handleLogout() {
+    document.getElementById('userMenuDropdown').classList.add('hidden');
+    localStorage.removeItem('bulgarian_kids_current_user');
+    CURRENT_USER = null;
+    showLoginScreen();
+}
+
+function showAdminMode() {
+    // Replace normal home screen cards with admin dashboard
+    console.log('Admin mode enabled');
+
+    // Show admin-specific UI
+    document.getElementById('appTitle').textContent = 'Admin Dashboard';
+
+    // Redirect to admin dashboard
+    setTimeout(() => {
+        openAdminDashboard();
+    }, 100);
+}
+
+// ============ Admin Dashboard ============
+async function openAdminDashboard() {
+    document.getElementById('homeScreen').classList.add('hidden');
+    document.getElementById('adminDashboard').classList.remove('hidden');
+    document.getElementById('backBtn').classList.remove('hidden');
+    document.getElementById('headerTitle').innerHTML = '<span class="mascot">📊</span> Admin Dashboard';
+
+    await loadAdminDashboard();
+}
+
+async function loadAdminDashboard() {
+    const container = document.getElementById('adminUserList');
+    container.innerHTML = '<div class="loading">Loading users...</div>';
+
+    if (!db) {
+        container.innerHTML = '<p>Database not connected</p>';
+        return;
+    }
+
+    try {
+        // Get all users
+        const { data: users, error } = await db
+            .from('users')
+            .select('*')
+            .order('last_active', { ascending: false });
+
+        if (error) throw error;
+
+        if (!users || users.length === 0) {
+            container.innerHTML = '<p>No users found</p>';
+            return;
+        }
+
+        container.innerHTML = users
+            .filter(u => u.user_id !== 'admin') // Don't show admin user
+            .map(user => `
+                <div class="admin-user-card" onclick="showUserDetail('${user.user_id}')">
+                    <div class="user-card-info">
+                        <div class="user-avatar">${user.user_id.charAt(0).toUpperCase()}</div>
+                        <div>
+                            <div class="user-card-name">${user.user_id}</div>
+                            <div class="user-card-stats">
+                                ${user.baba_points || 0} pts • ${user.vocab_mastered || 0} words • 🔥${user.best_streak || 0}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="user-card-arrow">→</div>
+                </div>
+            `).join('');
+    } catch (err) {
+        console.error('Error loading users:', err);
+        container.innerHTML = '<p>Error loading users</p>';
+    }
+}
+
+async function showUserDetail(userId) {
+    document.getElementById('adminUserList').classList.add('hidden');
+    document.getElementById('adminUserDetail').classList.remove('hidden');
+    document.getElementById('detailUserName').textContent = userId;
+
+    const statsContainer = document.getElementById('detailStats');
+    const wordsContainer = document.getElementById('detailWordsList');
+    const activityContainer = document.getElementById('detailActivityList');
+
+    statsContainer.innerHTML = '<div class="loading">Loading...</div>';
+
+    if (!db) return;
+
+    try {
+        // Load user profile
+        const { data: user } = await db.from('users').select('*').eq('user_id', userId).single();
+
+        // Load user words
+        const { data: words } = await db.from('words').select('*').eq('user_id', userId);
+
+        // Load recent activity
+        const { data: activity } = await db
+            .from('activity')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+            .limit(20);
+
+        // Display stats
+        if (user) {
+            statsContainer.innerHTML = `
+                <div class="detail-stat-card">
+                    <div class="detail-stat-value">${user.baba_points || 0}</div>
+                    <div class="detail-stat-label">Baba Points</div>
+                </div>
+                <div class="detail-stat-card">
+                    <div class="detail-stat-value">${user.vocab_mastered || 0}</div>
+                    <div class="detail-stat-label">Words Mastered</div>
+                </div>
+                <div class="detail-stat-card">
+                    <div class="detail-stat-value">${user.alphabet_mastered || 0}</div>
+                    <div class="detail-stat-label">Letters Learned</div>
+                </div>
+                <div class="detail-stat-card">
+                    <div class="detail-stat-value">🔥 ${user.best_streak || 0}</div>
+                    <div class="detail-stat-label">Best Streak</div>
+                </div>
+            `;
+        }
+
+        // Display words
+        if (words && words.length > 0) {
+            wordsContainer.innerHTML = words.map(w => `
+                <span class="detail-word-chip ${w.mastered ? 'mastered' : ''}">${w.cyrillic}</span>
+            `).join('');
+        } else {
+            wordsContainer.innerHTML = '<p>No words yet</p>';
+        }
+
+        // Display activity
+        if (activity && activity.length > 0) {
+            const activityIcons = {
+                'quiz_correct': '✅',
+                'quiz_wrong': '❌',
+                'word_mastered': '⭐',
+                'letter_mastered': '🔤',
+                'session_start': '🚀',
+                'tv_purchase': '📺',
+                'milestone_reached': '🏆'
+            };
+
+            activityContainer.innerHTML = activity.slice(0, 10).map(a => {
+                const time = new Date(a.created_at).toLocaleDateString();
+                return `
+                    <div class="activity-item">
+                        <span class="activity-icon">${activityIcons[a.event] || '📝'}</span>
+                        <span class="activity-text">${a.event.replace('_', ' ')}</span>
+                        <span class="activity-time">${time}</span>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            activityContainer.innerHTML = '<p>No activity yet</p>';
+        }
+
+        // Store current user for messaging
+        window.adminViewingUser = userId;
+
+    } catch (err) {
+        console.error('Error loading user detail:', err);
+        statsContainer.innerHTML = '<p>Error loading data</p>';
+    }
+}
+
+function closeUserDetail() {
+    document.getElementById('adminUserDetail').classList.add('hidden');
+    document.getElementById('adminUserList').classList.remove('hidden');
+}
+
+function sendMessageToUser() {
+    if (window.adminViewingUser) {
+        closeAdminDashboard();
+        openSendMessage();
+        document.getElementById('messageRecipient').value = window.adminViewingUser;
+    }
+}
+
+function closeAdminDashboard() {
+    document.getElementById('adminDashboard').classList.add('hidden');
+    document.getElementById('adminUserDetail').classList.add('hidden');
+    document.getElementById('adminUserList').classList.remove('hidden');
+    goHome();
+}
