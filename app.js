@@ -127,6 +127,20 @@ const GREETINGS = [
     "Baba would be so proud!",
 ];
 
+// ============ Fallback Words (used if database is empty) ============
+const FALLBACK_WORDS = [
+    { id: 1, cyrillic: 'здравей', translit: 'zdravey', meaning: 'hello', category: 'greetings' },
+    { id: 2, cyrillic: 'довиждане', translit: 'dovizhane', meaning: 'goodbye', category: 'greetings' },
+    { id: 3, cyrillic: 'благодаря', translit: 'blagodarya', meaning: 'thank you', category: 'greetings' },
+    { id: 4, cyrillic: 'да', translit: 'da', meaning: 'yes', category: 'basics' },
+    { id: 5, cyrillic: 'не', translit: 'ne', meaning: 'no', category: 'basics' },
+    { id: 6, cyrillic: 'котка', translit: 'kotka', meaning: 'cat', category: 'animals' },
+    { id: 7, cyrillic: 'куче', translit: 'kuche', meaning: 'dog', category: 'animals' },
+    { id: 8, cyrillic: 'вода', translit: 'voda', meaning: 'water', category: 'food' },
+    { id: 9, cyrillic: 'хляб', translit: 'hlyab', meaning: 'bread', category: 'food' },
+    { id: 10, cyrillic: 'мляко', translit: 'mlyako', meaning: 'milk', category: 'food' },
+];
+
 // ============ State ============
 const state = {
     currentModule: null,
@@ -560,6 +574,10 @@ function setupAlphabetQuestion() {
     document.getElementById('recordPracticeSection').classList.add('hidden');
     document.getElementById('alphabetPlayback').classList.add('hidden');
 
+    // Hide admin section until after answer
+    const adminSection = document.getElementById('adminRecordSection');
+    if (adminSection) adminSection.classList.add('hidden');
+
     // Simple: Start with first 5 letters, unlock more as mastered
     if (state.alphabet.introduced.length === 0) {
         for (let i = 0; i < 5; i++) {
@@ -590,14 +608,14 @@ function setupAlphabetQuestion() {
     state.alphabet.currentQuestion = questionIdx;
     state.alphabet.choices = choices;
 
-    // Update UI with picture and word
+    // Update UI - only show the letter on front (no picture)
     document.getElementById('alphabetLetter').textContent = letter.letter;
-    document.getElementById('letterPicture').textContent = letter.picture || '📖';
-    document.getElementById('letterWord').textContent = `${letter.word} (${letter.wordEn})`;
 
-    // Setup feedback display
+    // Setup feedback display (shown after answer)
     document.getElementById('feedbackSound').textContent = letter.phonetic;
     document.getElementById('feedbackHint').textContent = letter.hint;
+    document.getElementById('feedbackPicture').textContent = letter.picture || '📖';
+    document.getElementById('feedbackWord').textContent = `${letter.word} (${letter.wordEn})`;
 
     const choicesContainer = document.getElementById('alphabetChoices');
     choicesContainer.innerHTML = choices.map((c, i) => `
@@ -672,16 +690,23 @@ function selectAlphabetChoice(choiceIndex) {
     saveState();
     syncUserProfile();
 
-    // Show feedback overlay and play sound
+    // Show feedback overlay with picture and auto-play audio
     setTimeout(() => {
         feedback.classList.remove('hidden');
         document.getElementById('alphabetChoices').classList.add('hidden');
-        speakLetterWithHint(letter);
+
+        // Auto-play letter audio (uses recorded audio if available, TTS otherwise)
+        playLetterAudio(questionIdx, letter);
 
         // Show recording practice and next button after delay
         setTimeout(() => {
             document.getElementById('recordPracticeSection').classList.remove('hidden');
             document.getElementById('nextLetterBtn').classList.remove('hidden');
+
+            // Show admin section for admin users
+            if (isAdmin()) {
+                showAdminLetterRecording(questionIdx);
+            }
         }, 1000);
     }, 500);
 }
@@ -699,12 +724,6 @@ function updateAlphabetProgress() {
     const progress = (mastered / 30) * 100;
     document.getElementById('alphabetProgressBar').style.width = `${progress}%`;
     document.getElementById('streakDisplay').textContent = `🔥 ${state.game.currentStreak}`;
-}
-
-function speakCurrentLetter() {
-    if (state.alphabet.currentQuestion !== null) {
-        speakLetterWithHint(ALPHABET[state.alphabet.currentQuestion]);
-    }
 }
 
 // ============ Alphabet Recording ============
@@ -763,12 +782,245 @@ function playAlphabetRecording() {
     }
 }
 
+// ============ Letter Audio (Admin Recording & Playback) ============
+let letterAudioCache = {}; // Cache loaded letter audio from database
+let adminLetterRecorder = null;
+let adminLetterAudioChunks = [];
+let adminLetterRecordedBase64 = null;
+let adminLetterRecording = false;
+let adminLetterStream = null;
+
+// Load all letter audio from database on init
+async function loadLetterAudioFromDatabase() {
+    if (!db) return;
+
+    try {
+        const { data, error } = await db
+            .from('letter_audio')
+            .select('*');
+
+        if (error) {
+            console.error('Error loading letter audio:', error);
+            return;
+        }
+
+        if (data && data.length > 0) {
+            data.forEach(item => {
+                letterAudioCache[item.letter_index] = item.audio;
+            });
+            console.log(`Loaded ${data.length} letter audio recordings`);
+        }
+    } catch (err) {
+        console.error('Letter audio load error:', err);
+    }
+}
+
+// Play letter audio - uses recorded audio if available, TTS otherwise
+async function playLetterAudio(letterIndex, letter) {
+    // Check if we have recorded audio in cache
+    if (letterAudioCache[letterIndex]) {
+        try {
+            const audio = new Audio(letterAudioCache[letterIndex]);
+            audio.play().catch(err => {
+                console.error('Letter audio playback error:', err);
+                speakLetterWithHint(letter);
+            });
+            return;
+        } catch (err) {
+            console.error('Letter audio error:', err);
+        }
+    }
+
+    // Fall back to TTS
+    speakLetterWithHint(letter);
+}
+
+// Show admin letter recording section
+function showAdminLetterRecording(letterIndex) {
+    const section = document.getElementById('adminRecordSection');
+    if (!section) return;
+
+    section.classList.remove('hidden');
+    adminLetterRecordedBase64 = null;
+    document.getElementById('adminLetterPlayback').classList.add('hidden');
+
+    // Update status based on whether audio exists
+    const statusEl = document.getElementById('adminAudioStatus');
+    if (letterAudioCache[letterIndex]) {
+        statusEl.textContent = '✅ Audio saved in database';
+        statusEl.classList.add('has-audio');
+        statusEl.classList.remove('error');
+    } else {
+        statusEl.textContent = 'No audio saved yet';
+        statusEl.classList.remove('has-audio', 'error');
+    }
+
+    // Reset record button
+    const btn = document.getElementById('adminLetterRecordBtn');
+    if (btn) {
+        btn.classList.remove('recording');
+        document.getElementById('adminLetterRecordIcon').textContent = '🎤';
+        document.getElementById('adminLetterRecordText').textContent = 'Record Audio';
+    }
+    document.getElementById('adminLetterRecordingIndicator').classList.add('hidden');
+}
+
+// Toggle admin letter recording
+async function toggleAdminLetterRecording() {
+    const btn = document.getElementById('adminLetterRecordBtn');
+    const indicator = document.getElementById('adminLetterRecordingIndicator');
+    const playback = document.getElementById('adminLetterPlayback');
+
+    if (adminLetterRecording) {
+        // Stop recording
+        if (adminLetterRecorder && adminLetterRecorder.state === 'recording') {
+            adminLetterRecorder.stop();
+        }
+        adminLetterRecording = false;
+        btn.classList.remove('recording');
+        document.getElementById('adminLetterRecordIcon').textContent = '🎤';
+        document.getElementById('adminLetterRecordText').textContent = 'Record Again';
+        indicator.classList.add('hidden');
+    } else {
+        // Start recording
+        try {
+            adminLetterStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+            adminLetterRecorder = new MediaRecorder(adminLetterStream, { mimeType });
+            adminLetterAudioChunks = [];
+
+            adminLetterRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) {
+                    adminLetterAudioChunks.push(e.data);
+                }
+            };
+
+            adminLetterRecorder.onstop = () => {
+                const blob = new Blob(adminLetterAudioChunks, { type: mimeType });
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    adminLetterRecordedBase64 = reader.result;
+                    playback.classList.remove('hidden');
+                };
+                reader.readAsDataURL(blob);
+
+                if (adminLetterStream) {
+                    adminLetterStream.getTracks().forEach(t => t.stop());
+                    adminLetterStream = null;
+                }
+            };
+
+            adminLetterRecorder.start();
+            adminLetterRecording = true;
+            btn.classList.add('recording');
+            document.getElementById('adminLetterRecordIcon').textContent = '⏹️';
+            document.getElementById('adminLetterRecordText').textContent = 'Stop Recording';
+            indicator.classList.remove('hidden');
+            playback.classList.add('hidden');
+            playSound('coin');
+        } catch (err) {
+            console.error('Admin recording error:', err);
+            alert('Could not access microphone');
+        }
+    }
+}
+
+// Play admin letter recording preview
+function playAdminLetterRecording() {
+    if (adminLetterRecordedBase64) {
+        const audio = new Audio(adminLetterRecordedBase64);
+        audio.play().catch(err => console.error('Playback error:', err));
+    }
+}
+
+// Save admin letter audio to database
+async function saveAdminLetterAudio() {
+    if (!adminLetterRecordedBase64) {
+        showUnlockMessage('Record audio first!');
+        return;
+    }
+
+    if (!db) {
+        showUnlockMessage('Database not connected');
+        return;
+    }
+
+    const letterIndex = state.alphabet.currentQuestion;
+    const letter = ALPHABET[letterIndex];
+    const statusEl = document.getElementById('adminAudioStatus');
+
+    statusEl.textContent = 'Saving...';
+    statusEl.classList.remove('has-audio', 'error');
+
+    try {
+        // Check if audio already exists for this letter
+        const { data: existing } = await db
+            .from('letter_audio')
+            .select('id')
+            .eq('letter_index', letterIndex)
+            .single();
+
+        if (existing) {
+            // Update existing record
+            const { error } = await db
+                .from('letter_audio')
+                .update({
+                    audio: adminLetterRecordedBase64,
+                    recorded_by: CURRENT_USER,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('letter_index', letterIndex);
+
+            if (error) throw error;
+        } else {
+            // Insert new record
+            const { error } = await db
+                .from('letter_audio')
+                .insert({
+                    letter_index: letterIndex,
+                    letter: letter.letter,
+                    audio: adminLetterRecordedBase64,
+                    recorded_by: CURRENT_USER
+                });
+
+            if (error) throw error;
+        }
+
+        // Update cache
+        letterAudioCache[letterIndex] = adminLetterRecordedBase64;
+
+        statusEl.textContent = '✅ Audio saved successfully!';
+        statusEl.classList.add('has-audio');
+        showUnlockMessage('Letter audio saved!');
+        logActivity('letter_audio_saved', 'alphabet', { letter: letter.letter, letterIndex });
+
+    } catch (err) {
+        console.error('Error saving letter audio:', err);
+        statusEl.textContent = 'Error saving audio';
+        statusEl.classList.add('error');
+        showUnlockMessage('Error saving audio');
+    }
+}
+
+// Update speakCurrentLetter to use recorded audio
+function speakCurrentLetter() {
+    if (state.alphabet.currentQuestion !== null) {
+        const letterIndex = state.alphabet.currentQuestion;
+        const letter = ALPHABET[letterIndex];
+        playLetterAudio(letterIndex, letter);
+    }
+}
+
 // ============ Vocab Module ============
 function initVocabModule() {
+    console.log('initVocabModule: words count =', state.vocab.words.length);
+
     if (state.vocab.words.length < 2) {
+        console.log('initVocabModule: showing empty state');
         document.getElementById('vocabEmpty').classList.remove('hidden');
         document.getElementById('vocabCardContainer').classList.add('hidden');
     } else {
+        console.log('initVocabModule: showing quiz');
         document.getElementById('vocabEmpty').classList.add('hidden');
         document.getElementById('vocabCardContainer').classList.remove('hidden');
 
@@ -806,7 +1058,12 @@ function introduceNewWords() {
 
 
 function setupVocabQuestion() {
-    if (state.vocab.words.length < 2) return;
+    console.log('setupVocabQuestion: starting with', state.vocab.words.length, 'words');
+
+    if (state.vocab.words.length < 2) {
+        console.log('setupVocabQuestion: not enough words, returning');
+        return;
+    }
 
     // Ensure all words have tracking fields
     state.vocab.words.forEach(w => {
@@ -834,7 +1091,12 @@ function setupVocabQuestion() {
         introduced.push(newWord);
     }
 
-    if (introduced.length < 2) return;
+    console.log('setupVocabQuestion: introduced count after while loop =', introduced.length);
+
+    if (introduced.length < 2) {
+        console.log('setupVocabQuestion: not enough introduced words, returning');
+        return;
+    }
 
     // Smart selection with spaced repetition
     // Calculate priority score for each word (higher = needs more practice)
@@ -899,6 +1161,8 @@ function setupVocabQuestion() {
 
     // Build choices from OTHER introduced words
     const otherWords = introduced.filter(w => w !== word);
+    console.log('setupVocabQuestion: otherWords count =', otherWords.length);
+
     const choices = [{ idx: questionIdx, meaning: word.meaning, correct: true }];
 
     if (otherWords.length > 0) {
@@ -906,6 +1170,8 @@ function setupVocabQuestion() {
         const wrongIdx = state.vocab.words.indexOf(wrongWord);
         choices.push({ idx: wrongIdx, meaning: wrongWord.meaning, correct: false });
     }
+
+    console.log('setupVocabQuestion: choices =', choices.length, choices.map(c => c.meaning));
 
     // Shuffle choice order
     if (Math.random() > 0.5 && choices.length > 1) {
@@ -919,6 +1185,7 @@ function setupVocabQuestion() {
     document.getElementById('vocabTranslit').textContent = word.translit;
 
     const choicesContainer = document.getElementById('vocabChoices');
+    console.log('setupVocabQuestion: populating choices into', choicesContainer);
     choicesContainer.innerHTML = choices.map((c, i) => `
         <button class="choice-btn-kids" onclick="selectVocabChoice(${i})">${c.meaning}</button>
     `).join('');
@@ -1896,7 +2163,13 @@ async function deleteWord() {
 
 // ============ Database Functions (Supabase) ============
 async function loadWordsFromDatabase() {
-    if (!db) return;
+    // If no database, use fallback words if we don't already have words
+    if (!db) {
+        if (state.vocab.words.length < 2) {
+            useFallbackWords();
+        }
+        return;
+    }
 
     try {
         const { data, error } = await db
@@ -1907,6 +2180,10 @@ async function loadWordsFromDatabase() {
 
         if (error) {
             console.error('Error loading words:', error);
+            // Use fallback if we don't have words
+            if (state.vocab.words.length < 2) {
+                useFallbackWords();
+            }
             return;
         }
 
@@ -1932,12 +2209,20 @@ async function loadWordsFromDatabase() {
         }
     } catch (err) {
         console.error('Database error:', err);
+        // Use fallback if we don't have words
+        if (state.vocab.words.length < 2) {
+            useFallbackWords();
+        }
     }
 }
 
 // Copy starter words from 'default' user to current user
 async function copyStarterWords() {
-    if (!db || CURRENT_USER === 'default') return;
+    // Use fallback words if no database or if we're the default user
+    if (!db || CURRENT_USER === 'default') {
+        useFallbackWords();
+        return;
+    }
 
     try {
         console.log('Copying starter words for new user:', CURRENT_USER);
@@ -1950,7 +2235,8 @@ async function copyStarterWords() {
             .order('created_at', { ascending: true });
 
         if (error || !defaultWords || defaultWords.length === 0) {
-            console.log('No default words to copy');
+            console.log('No default words to copy, using fallback');
+            useFallbackWords();
             return;
         }
 
@@ -1996,10 +2282,28 @@ async function copyStarterWords() {
             updateHomeScreen();
             console.log(`Copied ${copiedWords.length} starter words`);
             showUnlockMessage(`Welcome! ${copiedWords.length} words ready to learn!`);
+        } else {
+            // All inserts failed, use fallback
+            useFallbackWords();
         }
     } catch (err) {
         console.error('Error copying starter words:', err);
+        useFallbackWords();
     }
+}
+
+// Use hardcoded fallback words when database is unavailable
+function useFallbackWords() {
+    console.log('Using fallback words');
+    state.vocab.words = FALLBACK_WORDS.map(w => ({
+        ...w,
+        correct: 0,
+        wrong: 0,
+        introduced: false,
+        isCustom: false
+    }));
+    saveState();
+    updateHomeScreen();
 }
 
 async function saveWordToDatabase(word) {
@@ -2804,6 +3108,7 @@ async function initializeApp() {
         if (db) {
             await loadWordsFromDatabase();
             await loadUserProfile();
+            await loadLetterAudioFromDatabase();
             await checkUnreadMessages();
             logActivity('session_start', null, { user: CURRENT_USER });
             syncUserProfile();

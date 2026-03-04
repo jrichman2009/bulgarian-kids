@@ -78,3 +78,21 @@ SELECT
     MAX(created_at) as last_activity
 FROM activity
 GROUP BY user_id;
+
+-- Letter audio table: stores admin-recorded audio for alphabet letters
+CREATE TABLE IF NOT EXISTS letter_audio (
+    id BIGSERIAL PRIMARY KEY,
+    letter_index INTEGER NOT NULL UNIQUE,
+    letter TEXT NOT NULL,
+    audio TEXT NOT NULL,  -- base64 encoded audio
+    recorded_by TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create index for faster letter audio lookups
+CREATE INDEX IF NOT EXISTS letter_audio_letter_index_idx ON letter_audio(letter_index);
+
+-- Enable RLS but allow all access (public app)
+ALTER TABLE letter_audio ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all letter_audio" ON letter_audio FOR ALL USING (true) WITH CHECK (true);

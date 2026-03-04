@@ -2414,6 +2414,71 @@ body {
     animation: pulse-record 1s infinite;
 }
 
+/* Feedback picture and word styling */
+.feedback-picture {
+    font-size: 64px;
+    margin: 8px 0;
+    animation: float 3s ease-in-out infinite;
+}
+
+.feedback-word {
+    font-size: 18px;
+    color: var(--text-light);
+    font-style: italic;
+    margin-bottom: 12px;
+}
+
+/* Admin Audio Recording Section */
+.admin-record-section {
+    background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+    border: 3px solid #F59E0B;
+    border-radius: 20px;
+    padding: 16px;
+    margin-top: 16px;
+}
+
+.admin-record-header {
+    font-size: 16px;
+    font-weight: 700;
+    color: #92400E;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.admin-record-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-record-playback {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 12px;
+}
+
+.admin-record-playback button {
+    flex: 1;
+    max-width: 150px;
+}
+
+.admin-audio-status {
+    text-align: center;
+    font-size: 14px;
+    color: #059669;
+    margin-top: 8px;
+}
+
+.admin-audio-status.error {
+    color: #DC2626;
+}
+
+.admin-audio-status.has-audio {
+    color: #059669;
+}
+
 /* ============ Admin Dashboard ============ */
 .admin-dashboard-header {
     text-align: center;

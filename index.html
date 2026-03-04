@@ -193,21 +193,18 @@
                 <div id="alphabetProgressBar" class="progress-fill-kids"></div>
             </div>
 
-            <!-- Letter Card with Picture -->
+            <!-- Letter Card - Front shows only letter -->
             <div id="alphabetCard" class="alphabet-card-enhanced">
                 <div class="letter-card-front" id="letterCardFront">
-                    <div class="letter-picture" id="letterPicture">🍎</div>
                     <div class="letter-display-big" id="alphabetLetter">А а</div>
-                    <div class="letter-word" id="letterWord">ябълка (apple)</div>
-                    <button class="speak-btn-kids hear-btn" onclick="speakCurrentLetter()">
-                        🔊 Hear it!
-                    </button>
                 </div>
 
-                <!-- Answer Feedback Overlay -->
+                <!-- Answer Feedback Overlay - shows after answer -->
                 <div id="answerFeedback" class="answer-feedback hidden">
                     <div class="feedback-icon" id="feedbackIcon">✓</div>
                     <div class="feedback-text" id="feedbackText">Correct!</div>
+                    <div class="feedback-picture" id="feedbackPicture">🍎</div>
+                    <div class="feedback-word" id="feedbackWord">ябълка (apple)</div>
                     <div class="feedback-sound" id="feedbackSound">ah</div>
                     <div class="feedback-hint" id="feedbackHint">like "a" in "father"</div>
                 </div>
@@ -223,8 +220,8 @@
                 <!-- Choices populated by JS -->
             </div>
 
-            <!-- Record Your Voice Section -->
-            <div class="record-practice-section" id="recordPracticeSection">
+            <!-- Record Your Voice Section (shown after answer) -->
+            <div class="record-practice-section hidden" id="recordPracticeSection">
                 <p class="practice-label">Practice saying it:</p>
                 <button class="record-practice-btn" id="alphabetRecordBtn" onclick="toggleAlphabetRecording()">
                     <span id="alphabetRecordIcon">🎤</span>
@@ -236,6 +233,27 @@
                 <div id="alphabetPlayback" class="audio-playback hidden">
                     <button class="play-btn" onclick="playAlphabetRecording()">▶️ Play mine</button>
                 </div>
+            </div>
+
+            <!-- Admin Audio Recording Section (only visible to admin) -->
+            <div class="admin-record-section hidden" id="adminRecordSection">
+                <div class="admin-record-header">
+                    <span>🎙️ Admin: Record Letter Audio</span>
+                </div>
+                <div class="admin-record-controls">
+                    <button class="btn-kids secondary-kids" id="adminLetterRecordBtn" onclick="toggleAdminLetterRecording()">
+                        <span id="adminLetterRecordIcon">🎤</span>
+                        <span id="adminLetterRecordText">Record Audio</span>
+                    </button>
+                    <div id="adminLetterRecordingIndicator" class="recording-indicator hidden">
+                        <span class="recording-dot"></span> Recording...
+                    </div>
+                </div>
+                <div class="admin-record-playback hidden" id="adminLetterPlayback">
+                    <button class="btn-kids" onclick="playAdminLetterRecording()">▶️ Preview</button>
+                    <button class="btn-kids primary-kids" onclick="saveAdminLetterAudio()">💾 Save to Database</button>
+                </div>
+                <div class="admin-audio-status" id="adminAudioStatus"></div>
             </div>
 
             <button id="nextLetterBtn" class="btn-kids primary-kids hidden" onclick="goToNextLetter()">
@@ -254,7 +272,7 @@
                 <div id="vocabProgressBar" class="progress-fill-kids"></div>
             </div>
 
-            <div id="vocabEmpty" class="empty-state-kids">
+            <div id="vocabEmpty" class="empty-state-kids hidden">
                 <div class="mascot-big">🐻</div>
                 <p>No words yet!</p>
                 <p style="font-size: 16px; margin-bottom: 16px;">Add words from the home screen</p>
