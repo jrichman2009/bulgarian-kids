@@ -2248,7 +2248,8 @@ body {
     box-shadow: var(--shadow);
     border: 4px solid var(--primary);
     position: relative;
-    overflow: hidden;
+    min-height: 350px;
+    overflow: visible;
 }
 
 .letter-card-front {
@@ -2382,18 +2383,22 @@ body {
 }
 
 .feedback-word-bulgarian {
+    display: block;
     font-size: 36px;
     font-weight: 800;
-    color: var(--text);
+    color: #4C1D95;
     margin-bottom: 8px;
     letter-spacing: 2px;
+    text-align: center;
 }
 
 .feedback-word-english {
+    display: block;
     font-size: 22px;
-    color: var(--text-light);
+    color: #7C3AED;
     font-style: italic;
     margin-bottom: 8px;
+    text-align: center;
 }
 
 /* Highlight the key letter in feedback words */
