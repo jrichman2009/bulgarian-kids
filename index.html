@@ -45,10 +45,12 @@
 
         <!-- Header -->
         <header class="header hidden" id="mainHeader">
-            <button id="backBtn" class="back-btn hidden" onclick="goHome()">←</button>
-            <h1 id="headerTitle">
-                <span class="mascot">🐻</span> <span id="appTitle">Learn Bulgarian!</span>
-            </h1>
+            <div class="header-left" onclick="goHome()">
+                <button id="backBtn" class="back-btn hidden" onclick="event.stopPropagation(); goHome()">←</button>
+                <h1 id="headerTitle">
+                    <span class="mascot">🐻</span> <span id="appTitle">Learn Bulgarian!</span>
+                </h1>
+            </div>
             <div class="header-user" onclick="showUserMenu()">
                 <span id="headerUserName">User</span>
                 <span class="user-dropdown">▼</span>
@@ -204,9 +206,9 @@
                     <div class="feedback-icon" id="feedbackIcon">✓</div>
                     <div class="feedback-text" id="feedbackText">Correct!</div>
                     <div class="feedback-picture" id="feedbackPicture">🍎</div>
-                    <div class="feedback-word" id="feedbackWord">ябълка (apple)</div>
+                    <div class="feedback-translit" id="feedbackTranslit">yabulka</div>
+                    <div class="feedback-word" id="feedbackWord">ябълка</div>
                     <div class="feedback-sound" id="feedbackSound">ah</div>
-                    <div class="feedback-hint" id="feedbackHint">like "a" in "father"</div>
                 </div>
             </div>
 
@@ -220,25 +222,13 @@
                 <!-- Choices populated by JS -->
             </div>
 
-            <!-- Record Your Voice Section (shown after answer) -->
-            <div class="record-practice-section hidden" id="recordPracticeSection">
-                <p class="practice-label">Practice saying it:</p>
-                <button class="record-practice-btn" id="alphabetRecordBtn" onclick="toggleAlphabetRecording()">
-                    <span id="alphabetRecordIcon">🎤</span>
-                    <span id="alphabetRecordText">Tap to record</span>
-                </button>
-                <div id="alphabetRecordingIndicator" class="recording-indicator hidden">
-                    <span class="recording-dot"></span> Recording...
-                </div>
-                <div id="alphabetPlayback" class="audio-playback hidden">
-                    <button class="play-btn" onclick="playAlphabetRecording()">▶️ Play mine</button>
-                </div>
-            </div>
-
             <!-- Admin Audio Recording Section (only visible to admin) -->
             <div class="admin-record-section hidden" id="adminRecordSection">
                 <div class="admin-record-header">
                     <span>🎙️ Admin: Record Letter Audio</span>
+                </div>
+                <div class="admin-countdown hidden" id="adminCountdown">
+                    <div class="countdown-number" id="countdownNumber">3</div>
                 </div>
                 <div class="admin-record-controls">
                     <button class="btn-kids secondary-kids" id="adminLetterRecordBtn" onclick="toggleAdminLetterRecording()">

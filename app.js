@@ -50,36 +50,36 @@ function initSupabase() {
 
 // ============ Alphabet with Pictures ============
 const ALPHABET = [
-    { letter: 'А а', soundBg: 'ааа', soundEn: 'ahh', phonetic: 'ah', hint: 'like "a" in "father"', picture: '🍎', word: 'ябълка', wordEn: 'apple' },
-    { letter: 'Б б', soundBg: 'бъ', soundEn: 'buh', phonetic: 'b', hint: 'like "b" in "boy"', picture: '🐻', word: 'баба', wordEn: 'grandma' },
-    { letter: 'В в', soundBg: 'въ', soundEn: 'vuh', phonetic: 'v', hint: 'like "v" in "van"', picture: '🌊', word: 'вълна', wordEn: 'wave' },
-    { letter: 'Г г', soundBg: 'гъ', soundEn: 'guh', phonetic: 'g', hint: 'like "g" in "go"', picture: '🍇', word: 'грозде', wordEn: 'grapes' },
-    { letter: 'Д д', soundBg: 'дъ', soundEn: 'duh', phonetic: 'd', hint: 'like "d" in "dog"', picture: '🏠', word: 'дом', wordEn: 'house' },
-    { letter: 'Е е', soundBg: 'еее', soundEn: 'eh', phonetic: 'e', hint: 'like "e" in "bed"', picture: '🦔', word: 'еж', wordEn: 'hedgehog' },
-    { letter: 'Ж ж', soundBg: 'жъ', soundEn: 'zhuh', phonetic: 'zh', hint: 'like "s" in "measure"', picture: '🐸', word: 'жаба', wordEn: 'frog' },
-    { letter: 'З з', soundBg: 'зъ', soundEn: 'zuh', phonetic: 'z', hint: 'like "z" in "zoo"', picture: '⭐', word: 'звезда', wordEn: 'star' },
-    { letter: 'И и', soundBg: 'иии', soundEn: 'eee', phonetic: 'ee', hint: 'like "ee" in "see"', picture: '🎮', word: 'игра', wordEn: 'game' },
-    { letter: 'Й й', soundBg: 'ий', soundEn: 'y', phonetic: 'y', hint: 'like "y" in "yes"', picture: '🥛', word: 'йогурт', wordEn: 'yogurt' },
-    { letter: 'К к', soundBg: 'къ', soundEn: 'kuh', phonetic: 'k', hint: 'like "k" in "kite"', picture: '🐱', word: 'котка', wordEn: 'cat' },
-    { letter: 'Л л', soundBg: 'лъ', soundEn: 'luh', phonetic: 'l', hint: 'like "l" in "love"', picture: '🍋', word: 'лимон', wordEn: 'lemon' },
-    { letter: 'М м', soundBg: 'мъ', soundEn: 'muh', phonetic: 'm', hint: 'like "m" in "mom"', picture: '🐭', word: 'мишка', wordEn: 'mouse' },
-    { letter: 'Н н', soundBg: 'нъ', soundEn: 'nuh', phonetic: 'n', hint: 'like "n" in "no"', picture: '🌙', word: 'нощ', wordEn: 'night' },
-    { letter: 'О о', soundBg: 'ооо', soundEn: 'oh', phonetic: 'o', hint: 'like "o" in "more"', picture: '☁️', word: 'облак', wordEn: 'cloud' },
-    { letter: 'П п', soundBg: 'пъ', soundEn: 'puh', phonetic: 'p', hint: 'like "p" in "pen"', picture: '🐦', word: 'птица', wordEn: 'bird' },
-    { letter: 'Р р', soundBg: 'ръ', soundEn: 'rruh', phonetic: 'r', hint: 'rolled "r"', picture: '🐟', word: 'риба', wordEn: 'fish' },
-    { letter: 'С с', soundBg: 'съ', soundEn: 'suh', phonetic: 's', hint: 'like "s" in "sun"', picture: '☀️', word: 'слънце', wordEn: 'sun' },
-    { letter: 'Т т', soundBg: 'тъ', soundEn: 'tuh', phonetic: 't', hint: 'like "t" in "top"', picture: '🚂', word: 'трен', wordEn: 'train' },
-    { letter: 'У у', soundBg: 'ууу', soundEn: 'ooo', phonetic: 'oo', hint: 'like "oo" in "moon"', picture: '🦆', word: 'утка', wordEn: 'duck' },
-    { letter: 'Ф ф', soundBg: 'фъ', soundEn: 'fuh', phonetic: 'f', hint: 'like "f" in "fun"', picture: '🎆', word: 'фойерверк', wordEn: 'fireworks' },
-    { letter: 'Х х', soundBg: 'хъ', soundEn: 'huh', phonetic: 'h', hint: 'like "h" in "house"', picture: '🍞', word: 'хляб', wordEn: 'bread' },
-    { letter: 'Ц ц', soundBg: 'цъ', soundEn: 'tsuh', phonetic: 'ts', hint: 'like "ts" in "cats"', picture: '🌸', word: 'цвете', wordEn: 'flower' },
-    { letter: 'Ч ч', soundBg: 'чъ', soundEn: 'chuh', phonetic: 'ch', hint: 'like "ch" in "cheese"', picture: '☂️', word: 'чадър', wordEn: 'umbrella' },
-    { letter: 'Ш ш', soundBg: 'шъ', soundEn: 'shuh', phonetic: 'sh', hint: 'like "sh" in "ship"', picture: '🎩', word: 'шапка', wordEn: 'hat' },
-    { letter: 'Щ щ', soundBg: 'щъ', soundEn: 'shtuh', phonetic: 'sht', hint: 'like "sht"', picture: '🦑', word: 'щука', wordEn: 'pike fish' },
-    { letter: 'Ъ ъ', soundBg: 'ъъъ', soundEn: 'uh', phonetic: 'uh', hint: 'like "u" in "but"', picture: '🏔️', word: 'връх', wordEn: 'peak' },
-    { letter: 'Ь ь', soundBg: 'ер малък', soundEn: 'soft', phonetic: '(soft)', hint: 'makes letters soft', picture: '🧈', word: 'мек', wordEn: 'soft' },
-    { letter: 'Ю ю', soundBg: 'юу', soundEn: 'yoo', phonetic: 'yu', hint: 'like "u" in "cute"', picture: '🎠', word: 'юла', wordEn: 'spinning top' },
-    { letter: 'Я я', soundBg: 'яа', soundEn: 'yah', phonetic: 'ya', hint: 'like "ya" in "yard"', picture: '🍳', word: 'яйце', wordEn: 'egg' },
+    { letter: 'А а', soundBg: 'ааа', soundEn: 'ahh', phonetic: 'ah', hint: 'like "a" in "father"', picture: '🍎', word: 'ябълка', wordEn: 'apple', translit: 'yabulka' },
+    { letter: 'Б б', soundBg: 'бъ', soundEn: 'buh', phonetic: 'b', hint: 'like "b" in "boy"', picture: '🐻', word: 'баба', wordEn: 'grandma', translit: 'baba' },
+    { letter: 'В в', soundBg: 'въ', soundEn: 'vuh', phonetic: 'v', hint: 'like "v" in "van"', picture: '🌊', word: 'вълна', wordEn: 'wave', translit: 'vulna' },
+    { letter: 'Г г', soundBg: 'гъ', soundEn: 'guh', phonetic: 'g', hint: 'like "g" in "go"', picture: '🍇', word: 'грозде', wordEn: 'grapes', translit: 'grozde' },
+    { letter: 'Д д', soundBg: 'дъ', soundEn: 'duh', phonetic: 'd', hint: 'like "d" in "dog"', picture: '🏠', word: 'дом', wordEn: 'house', translit: 'dom' },
+    { letter: 'Е е', soundBg: 'еее', soundEn: 'eh', phonetic: 'e', hint: 'like "e" in "bed"', picture: '🦔', word: 'еж', wordEn: 'hedgehog', translit: 'ezh' },
+    { letter: 'Ж ж', soundBg: 'жъ', soundEn: 'zhuh', phonetic: 'zh', hint: 'like "s" in "measure"', picture: '🐸', word: 'жаба', wordEn: 'frog', translit: 'zhaba' },
+    { letter: 'З з', soundBg: 'зъ', soundEn: 'zuh', phonetic: 'z', hint: 'like "z" in "zoo"', picture: '⭐', word: 'звезда', wordEn: 'star', translit: 'zvezda' },
+    { letter: 'И и', soundBg: 'иии', soundEn: 'eee', phonetic: 'ee', hint: 'like "ee" in "see"', picture: '🎮', word: 'игра', wordEn: 'game', translit: 'igra' },
+    { letter: 'Й й', soundBg: 'ий', soundEn: 'y', phonetic: 'y', hint: 'like "y" in "yes"', picture: '🥛', word: 'йогурт', wordEn: 'yogurt', translit: 'yogurt' },
+    { letter: 'К к', soundBg: 'къ', soundEn: 'kuh', phonetic: 'k', hint: 'like "k" in "kite"', picture: '🐱', word: 'котка', wordEn: 'cat', translit: 'kotka' },
+    { letter: 'Л л', soundBg: 'лъ', soundEn: 'luh', phonetic: 'l', hint: 'like "l" in "love"', picture: '🍋', word: 'лимон', wordEn: 'lemon', translit: 'limon' },
+    { letter: 'М м', soundBg: 'мъ', soundEn: 'muh', phonetic: 'm', hint: 'like "m" in "mom"', picture: '🐭', word: 'мишка', wordEn: 'mouse', translit: 'mishka' },
+    { letter: 'Н н', soundBg: 'нъ', soundEn: 'nuh', phonetic: 'n', hint: 'like "n" in "no"', picture: '🌙', word: 'нощ', wordEn: 'night', translit: 'nosht' },
+    { letter: 'О о', soundBg: 'ооо', soundEn: 'oh', phonetic: 'o', hint: 'like "o" in "more"', picture: '☁️', word: 'облак', wordEn: 'cloud', translit: 'oblak' },
+    { letter: 'П п', soundBg: 'пъ', soundEn: 'puh', phonetic: 'p', hint: 'like "p" in "pen"', picture: '🐦', word: 'птица', wordEn: 'bird', translit: 'ptitsa' },
+    { letter: 'Р р', soundBg: 'ръ', soundEn: 'rruh', phonetic: 'r', hint: 'rolled "r"', picture: '🐟', word: 'риба', wordEn: 'fish', translit: 'riba' },
+    { letter: 'С с', soundBg: 'съ', soundEn: 'suh', phonetic: 's', hint: 'like "s" in "sun"', picture: '☀️', word: 'слънце', wordEn: 'sun', translit: 'sluntse' },
+    { letter: 'Т т', soundBg: 'тъ', soundEn: 'tuh', phonetic: 't', hint: 'like "t" in "top"', picture: '🚂', word: 'трен', wordEn: 'train', translit: 'tren' },
+    { letter: 'У у', soundBg: 'ууу', soundEn: 'ooo', phonetic: 'oo', hint: 'like "oo" in "moon"', picture: '🦆', word: 'утка', wordEn: 'duck', translit: 'utka' },
+    { letter: 'Ф ф', soundBg: 'фъ', soundEn: 'fuh', phonetic: 'f', hint: 'like "f" in "fun"', picture: '🎆', word: 'фойерверк', wordEn: 'fireworks', translit: 'foyerverk' },
+    { letter: 'Х х', soundBg: 'хъ', soundEn: 'huh', phonetic: 'h', hint: 'like "h" in "house"', picture: '🍞', word: 'хляб', wordEn: 'bread', translit: 'hlyab' },
+    { letter: 'Ц ц', soundBg: 'цъ', soundEn: 'tsuh', phonetic: 'ts', hint: 'like "ts" in "cats"', picture: '🌸', word: 'цвете', wordEn: 'flower', translit: 'tsvete' },
+    { letter: 'Ч ч', soundBg: 'чъ', soundEn: 'chuh', phonetic: 'ch', hint: 'like "ch" in "cheese"', picture: '☂️', word: 'чадър', wordEn: 'umbrella', translit: 'chadur' },
+    { letter: 'Ш ш', soundBg: 'шъ', soundEn: 'shuh', phonetic: 'sh', hint: 'like "sh" in "ship"', picture: '🎩', word: 'шапка', wordEn: 'hat', translit: 'shapka' },
+    { letter: 'Щ щ', soundBg: 'щъ', soundEn: 'shtuh', phonetic: 'sht', hint: 'like "sht"', picture: '🦑', word: 'щука', wordEn: 'pike fish', translit: 'shtuka' },
+    { letter: 'Ъ ъ', soundBg: 'ъъъ', soundEn: 'uh', phonetic: 'uh', hint: 'like "u" in "but"', picture: '🏔️', word: 'връх', wordEn: 'peak', translit: 'vruh' },
+    { letter: 'Ь ь', soundBg: 'ер малък', soundEn: 'soft', phonetic: '(soft)', hint: 'makes letters soft', picture: '🧈', word: 'мек', wordEn: 'soft', translit: 'mek' },
+    { letter: 'Ю ю', soundBg: 'юу', soundEn: 'yoo', phonetic: 'yu', hint: 'like "u" in "cute"', picture: '🎠', word: 'юла', wordEn: 'spinning top', translit: 'yula' },
+    { letter: 'Я я', soundBg: 'яа', soundEn: 'yah', phonetic: 'ya', hint: 'like "ya" in "yard"', picture: '🍳', word: 'яйце', wordEn: 'egg', translit: 'yaytse' },
 ];
 
 
@@ -127,19 +127,7 @@ const GREETINGS = [
     "Baba would be so proud!",
 ];
 
-// ============ Fallback Words (used if database is empty) ============
-const FALLBACK_WORDS = [
-    { id: 1, cyrillic: 'здравей', translit: 'zdravey', meaning: 'hello', category: 'greetings' },
-    { id: 2, cyrillic: 'довиждане', translit: 'dovizhane', meaning: 'goodbye', category: 'greetings' },
-    { id: 3, cyrillic: 'благодаря', translit: 'blagodarya', meaning: 'thank you', category: 'greetings' },
-    { id: 4, cyrillic: 'да', translit: 'da', meaning: 'yes', category: 'basics' },
-    { id: 5, cyrillic: 'не', translit: 'ne', meaning: 'no', category: 'basics' },
-    { id: 6, cyrillic: 'котка', translit: 'kotka', meaning: 'cat', category: 'animals' },
-    { id: 7, cyrillic: 'куче', translit: 'kuche', meaning: 'dog', category: 'animals' },
-    { id: 8, cyrillic: 'вода', translit: 'voda', meaning: 'water', category: 'food' },
-    { id: 9, cyrillic: 'хляб', translit: 'hlyab', meaning: 'bread', category: 'food' },
-    { id: 10, cyrillic: 'мляко', translit: 'mlyako', meaning: 'milk', category: 'food' },
-];
+// No fallback words - users must add words explicitly
 
 // ============ State ============
 const state = {
@@ -235,21 +223,15 @@ function checkDailyReset() {
 
 // ============ Navigation ============
 function goHome() {
+    // Always hide all module screens
     document.querySelectorAll('.module-screen').forEach(m => m.classList.add('hidden'));
     document.getElementById('backBtn').classList.add('hidden');
 
-    // Admin users go to admin dashboard
-    if (isAdmin()) {
-        document.getElementById('adminDashboard').classList.remove('hidden');
-        document.getElementById('backBtn').classList.remove('hidden');
-        document.getElementById('headerTitle').innerHTML = '<span class="mascot">📊</span> Admin Dashboard';
-        loadAdminDashboard();
-        return;
-    }
-
+    // Show the home screen for all users (including admin)
     document.getElementById('homeScreen').classList.remove('hidden');
     const displayName = CURRENT_USER ? CURRENT_USER.charAt(0).toUpperCase() + CURRENT_USER.slice(1) : '';
     document.getElementById('appTitle').textContent = `${displayName}'s Bulgarian!`;
+    document.getElementById('headerTitle').innerHTML = '<span class="mascot">🐻</span> <span id="appTitle">' + displayName + "'s Bulgarian!</span>";
     state.currentModule = null;
     updateHomeScreen();
 }
@@ -571,8 +553,6 @@ function setupAlphabetQuestion() {
     document.getElementById('alphabetChoices').classList.remove('hidden');
     document.getElementById('answerFeedback').classList.add('hidden');
     document.getElementById('letterCardFront').style.display = 'block';
-    document.getElementById('recordPracticeSection').classList.add('hidden');
-    document.getElementById('alphabetPlayback').classList.add('hidden');
 
     // Hide admin section until after answer
     const adminSection = document.getElementById('adminRecordSection');
@@ -613,9 +593,9 @@ function setupAlphabetQuestion() {
 
     // Setup feedback display (shown after answer)
     document.getElementById('feedbackSound').textContent = letter.phonetic;
-    document.getElementById('feedbackHint').textContent = letter.hint;
     document.getElementById('feedbackPicture').textContent = letter.picture || '📖';
-    document.getElementById('feedbackWord').textContent = `${letter.word} (${letter.wordEn})`;
+    document.getElementById('feedbackTranslit').textContent = letter.translit || '';
+    document.getElementById('feedbackWord').textContent = letter.word;
 
     const choicesContainer = document.getElementById('alphabetChoices');
     choicesContainer.innerHTML = choices.map((c, i) => `
@@ -698,9 +678,8 @@ function selectAlphabetChoice(choiceIndex) {
         // Auto-play letter audio (uses recorded audio if available, TTS otherwise)
         playLetterAudio(questionIdx, letter);
 
-        // Show recording practice and next button after delay
+        // Show next button after delay
         setTimeout(() => {
-            document.getElementById('recordPracticeSection').classList.remove('hidden');
             document.getElementById('nextLetterBtn').classList.remove('hidden');
 
             // Show admin section for admin users
@@ -724,62 +703,6 @@ function updateAlphabetProgress() {
     const progress = (mastered / 30) * 100;
     document.getElementById('alphabetProgressBar').style.width = `${progress}%`;
     document.getElementById('streakDisplay').textContent = `🔥 ${state.game.currentStreak}`;
-}
-
-// ============ Alphabet Recording ============
-let alphabetMediaRecorder = null;
-let alphabetAudioChunks = [];
-let alphabetRecordedBlob = null;
-
-async function toggleAlphabetRecording() {
-    const btn = document.getElementById('alphabetRecordBtn');
-    const indicator = document.getElementById('alphabetRecordingIndicator');
-    const playback = document.getElementById('alphabetPlayback');
-
-    if (alphabetMediaRecorder && alphabetMediaRecorder.state === 'recording') {
-        // Stop recording
-        alphabetMediaRecorder.stop();
-        btn.classList.remove('recording');
-        document.getElementById('alphabetRecordIcon').textContent = '🎤';
-        document.getElementById('alphabetRecordText').textContent = 'Tap to record';
-        indicator.classList.add('hidden');
-    } else {
-        // Start recording
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            alphabetMediaRecorder = new MediaRecorder(stream);
-            alphabetAudioChunks = [];
-
-            alphabetMediaRecorder.ondataavailable = (e) => {
-                if (e.data.size > 0) {
-                    alphabetAudioChunks.push(e.data);
-                }
-            };
-
-            alphabetMediaRecorder.onstop = () => {
-                alphabetRecordedBlob = new Blob(alphabetAudioChunks, { type: 'audio/webm' });
-                playback.classList.remove('hidden');
-                stream.getTracks().forEach(track => track.stop());
-            };
-
-            alphabetMediaRecorder.start();
-            btn.classList.add('recording');
-            document.getElementById('alphabetRecordIcon').textContent = '⏹️';
-            document.getElementById('alphabetRecordText').textContent = 'Tap to stop';
-            indicator.classList.remove('hidden');
-            playback.classList.add('hidden');
-        } catch (err) {
-            console.error('Recording error:', err);
-            alert('Could not access microphone');
-        }
-    }
-}
-
-function playAlphabetRecording() {
-    if (alphabetRecordedBlob) {
-        const audio = new Audio(URL.createObjectURL(alphabetRecordedBlob));
-        audio.play();
-    }
 }
 
 // ============ Letter Audio (Admin Recording & Playback) ============
@@ -865,11 +788,13 @@ function showAdminLetterRecording(letterIndex) {
     document.getElementById('adminLetterRecordingIndicator').classList.add('hidden');
 }
 
-// Toggle admin letter recording
+// Toggle admin letter recording with visual countdown (no sound to avoid recording it)
 async function toggleAdminLetterRecording() {
     const btn = document.getElementById('adminLetterRecordBtn');
     const indicator = document.getElementById('adminLetterRecordingIndicator');
     const playback = document.getElementById('adminLetterPlayback');
+    const countdownEl = document.getElementById('adminCountdown');
+    const countdownNumber = document.getElementById('countdownNumber');
 
     if (adminLetterRecording) {
         // Stop recording
@@ -882,46 +807,71 @@ async function toggleAdminLetterRecording() {
         document.getElementById('adminLetterRecordText').textContent = 'Record Again';
         indicator.classList.add('hidden');
     } else {
-        // Start recording
-        try {
-            adminLetterStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
-            adminLetterRecorder = new MediaRecorder(adminLetterStream, { mimeType });
-            adminLetterAudioChunks = [];
+        // Show visual countdown (no sound to avoid recording it)
+        btn.disabled = true;
+        countdownEl.classList.remove('hidden');
 
-            adminLetterRecorder.ondataavailable = (e) => {
-                if (e.data.size > 0) {
-                    adminLetterAudioChunks.push(e.data);
-                }
+        // Countdown: 3... 2... 1... GO!
+        const countdownSequence = ['3', '2', '1', 'GO!'];
+        let i = 0;
+
+        const countdownInterval = setInterval(() => {
+            countdownNumber.textContent = countdownSequence[i];
+            i++;
+
+            if (i >= countdownSequence.length) {
+                clearInterval(countdownInterval);
+                countdownEl.classList.add('hidden');
+                btn.disabled = false;
+                // Start actual recording after countdown
+                startAdminRecording(btn, indicator, playback);
+            }
+        }, 800);
+
+        countdownNumber.textContent = countdownSequence[0];
+    }
+}
+
+// Actually start the admin recording (called after countdown)
+async function startAdminRecording(btn, indicator, playback) {
+    try {
+        adminLetterStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+        adminLetterRecorder = new MediaRecorder(adminLetterStream, { mimeType });
+        adminLetterAudioChunks = [];
+
+        adminLetterRecorder.ondataavailable = (e) => {
+            if (e.data.size > 0) {
+                adminLetterAudioChunks.push(e.data);
+            }
+        };
+
+        adminLetterRecorder.onstop = () => {
+            const blob = new Blob(adminLetterAudioChunks, { type: mimeType });
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                adminLetterRecordedBase64 = reader.result;
+                playback.classList.remove('hidden');
             };
+            reader.readAsDataURL(blob);
 
-            adminLetterRecorder.onstop = () => {
-                const blob = new Blob(adminLetterAudioChunks, { type: mimeType });
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    adminLetterRecordedBase64 = reader.result;
-                    playback.classList.remove('hidden');
-                };
-                reader.readAsDataURL(blob);
+            if (adminLetterStream) {
+                adminLetterStream.getTracks().forEach(t => t.stop());
+                adminLetterStream = null;
+            }
+        };
 
-                if (adminLetterStream) {
-                    adminLetterStream.getTracks().forEach(t => t.stop());
-                    adminLetterStream = null;
-                }
-            };
-
-            adminLetterRecorder.start();
-            adminLetterRecording = true;
-            btn.classList.add('recording');
-            document.getElementById('adminLetterRecordIcon').textContent = '⏹️';
-            document.getElementById('adminLetterRecordText').textContent = 'Stop Recording';
-            indicator.classList.remove('hidden');
-            playback.classList.add('hidden');
-            playSound('coin');
-        } catch (err) {
-            console.error('Admin recording error:', err);
-            alert('Could not access microphone');
-        }
+        adminLetterRecorder.start();
+        adminLetterRecording = true;
+        btn.classList.add('recording');
+        document.getElementById('adminLetterRecordIcon').textContent = '⏹️';
+        document.getElementById('adminLetterRecordText').textContent = 'Stop Recording';
+        indicator.classList.remove('hidden');
+        playback.classList.add('hidden');
+        // No sound here - would be recorded
+    } catch (err) {
+        console.error('Admin recording error:', err);
+        alert('Could not access microphone');
     }
 }
 
@@ -2163,11 +2113,9 @@ async function deleteWord() {
 
 // ============ Database Functions (Supabase) ============
 async function loadWordsFromDatabase() {
-    // If no database, use fallback words if we don't already have words
+    // If no database, leave words array empty - user must add words manually
     if (!db) {
-        if (state.vocab.words.length < 2) {
-            useFallbackWords();
-        }
+        console.log('No database connection - words must be added manually');
         return;
     }
 
@@ -2180,10 +2128,7 @@ async function loadWordsFromDatabase() {
 
         if (error) {
             console.error('Error loading words:', error);
-            // Use fallback if we don't have words
-            if (state.vocab.words.length < 2) {
-                useFallbackWords();
-            }
+            // Leave words empty on error - user can add words manually
             return;
         }
 
@@ -2204,30 +2149,28 @@ async function loadWordsFromDatabase() {
             saveState();
             updateHomeScreen();
         } else {
-            // No words for this user - copy starter words from 'default'
+            // No words for this user - try to copy from 'default' user (who added words manually)
             await copyStarterWords();
         }
     } catch (err) {
         console.error('Database error:', err);
-        // Use fallback if we don't have words
-        if (state.vocab.words.length < 2) {
-            useFallbackWords();
-        }
+        // Leave words empty on error - user can add words manually
     }
 }
 
 // Copy starter words from 'default' user to current user
+// Only copies words that were manually added by someone to the 'default' user
 async function copyStarterWords() {
-    // Use fallback words if no database or if we're the default user
+    // Can't copy if no database or if we're the default user
     if (!db || CURRENT_USER === 'default') {
-        useFallbackWords();
+        console.log('No words to copy - user must add words manually');
         return;
     }
 
     try {
-        console.log('Copying starter words for new user:', CURRENT_USER);
+        console.log('Checking for starter words to copy for new user:', CURRENT_USER);
 
-        // Get default words
+        // Get default words (these should only exist if someone manually added them)
         const { data: defaultWords, error } = await db
             .from('words')
             .select('*')
@@ -2235,8 +2178,7 @@ async function copyStarterWords() {
             .order('created_at', { ascending: true });
 
         if (error || !defaultWords || defaultWords.length === 0) {
-            console.log('No default words to copy, using fallback');
-            useFallbackWords();
+            console.log('No default words to copy - user must add words manually');
             return;
         }
 
@@ -2282,28 +2224,12 @@ async function copyStarterWords() {
             updateHomeScreen();
             console.log(`Copied ${copiedWords.length} starter words`);
             showUnlockMessage(`Welcome! ${copiedWords.length} words ready to learn!`);
-        } else {
-            // All inserts failed, use fallback
-            useFallbackWords();
         }
+        // If no words were copied, that's fine - user can add words manually
     } catch (err) {
         console.error('Error copying starter words:', err);
-        useFallbackWords();
+        // Leave words empty - user can add words manually
     }
-}
-
-// Use hardcoded fallback words when database is unavailable
-function useFallbackWords() {
-    console.log('Using fallback words');
-    state.vocab.words = FALLBACK_WORDS.map(w => ({
-        ...w,
-        correct: 0,
-        wrong: 0,
-        introduced: false,
-        isCustom: false
-    }));
-    saveState();
-    updateHomeScreen();
 }
 
 async function saveWordToDatabase(word) {
