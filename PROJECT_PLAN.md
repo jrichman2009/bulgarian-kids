@@ -2,185 +2,239 @@
 
 ## Overview
 
-Transform the adult Bulgarian Flashcards app into a kid-friendly version for 5-year-olds with "Baba Points" as the main currency.
+A gamified Bulgarian language learning app for children, featuring multi-user support, Baba Points currency, TV time rewards, and smart spaced repetition.
+
+**Live URL**: https://bulgarian-kids.vercel.app
 
 ---
 
-## Phase 1: UI Transformation ⬜
-**Status:** Planned
+## Phase 1: Core Infrastructure (COMPLETED)
 
-### HTML Changes
-- [ ] Simplify header with bear mascot 🐻
-- [ ] Replace XP bar with Baba Points display (👵)
-- [ ] Replace levels with 3-star system (⭐⭐⭐)
-- [ ] Remove sentences module (too complex)
-- [ ] Add mascot welcome speech bubble
-- [ ] Larger module cards with icons
-- [ ] Simplify daily goal to 5 stars
-- [ ] Replace achievements with "My Stickers" collection
+### User Login System
+- [x] Name-based login (no password required)
+- [x] Recent users list for quick switching
+- [x] URL param support (?user=name) for direct access
+- [x] User menu with switch/logout options
 
-### New Components
-- [ ] Mascot reactions (happy, encouraging)
-- [ ] Celebration overlay for correct answers
-- [ ] Sticker unlock animation
-- [ ] Star-filling animation for daily progress
+### Supabase Database Setup
+- [x] PostgreSQL database via Supabase
+- [x] Tables: users, words, activity, messages, letter_audio
+- [x] Row-level security enabled
+- [x] Real-time sync capabilities
 
----
-
-## Phase 2: Visual Design ⬜
-**Status:** Planned
-
-### Color Palette
-- Primary: Purple (#8B5CF6)
-- Secondary: Pink (#EC4899)
-- Accent: Orange (#F97316)
-- Success: Teal (#14B8A6)
-- Background: Light lavender (#F5F3FF)
-
-### Typography
-- Large, rounded fonts
-- Minimum 18px body text
-- 24px+ for buttons
-
-### Buttons
-- Minimum 60px height
-- Rounded corners (16px+)
-- Fun shadows/3D effects
-- Bounce animations on tap
-
-### Cards
-- Soft shadows
-- Rounded edges
-- Playful borders
-- Wobble animations
+### Multi-User Support
+- [x] Separate progress per user (localStorage)
+- [x] Shared word pool from 'default' user
+- [x] User profile sync to cloud
+- [x] Activity logging per user
 
 ---
 
-## Phase 3: Gamification Rework ⬜
-**Status:** Planned
+## Phase 2: ABC Letters Module (COMPLETED)
 
-### Baba Points System
-- [ ] +5 Baba Points per correct answer
-- [ ] +2 bonus for streaks
-- [ ] Visual coin animation when earning
-- [ ] Running total displayed with 👵 icon
+### Core Functionality
+- [x] 30 Bulgarian Cyrillic letters with data
+- [x] Letter data stored in app.js (ALPHABET constant)
+- [x] 2-choice quiz format
+- [x] Progressive letter unlocking (start with 5, unlock more)
+- [x] SRS-based mastery tracking (3 correct = mastered)
 
-### Star Progression (replaces levels)
-- ⭐☆☆ = 0-100 Baba Points
-- ⭐⭐☆ = 100-300 Baba Points
-- ⭐⭐⭐ = 300+ Baba Points
-- Star-up celebration with Baba message
+### Visual Feedback
+- [x] Pictures and emoji for each letter
+- [x] Example words with transliteration
+- [x] Letter highlighting in example words
+- [x] Auto-advance after answering (2 second countdown)
+- [x] Correct/wrong feedback overlays
 
-### Daily Goal (simplified)
-- 5 cards = 5 stars filled
-- Each card fills one star
-- All 5 = "Baba is proud!" message
-
-### Sticker Collection (replaces achievements)
-- [ ] 🎯 First Try - First correct answer
-- [ ] 🔤 Letter Learner - Learn 5 letters
-- [ ] 📚 Word Wizard - Learn 5 words
-- [ ] 🔥 Hot Streak - 5 in a row
-- [ ] ⭐ Superstar - Fill daily stars
-- [ ] 🐻 Bear's Friend - Play 3 days
-- [ ] 👵 Baba's Helper - Earn 100 points
-- [ ] 🏆 Champion - Master 10 letters
+### Audio System
+- [x] Admin can record audio for each letter
+- [x] Audio stored in database (letter_audio table)
+- [x] Fallback to TTS when no recording exists
+- [x] Audio caching for performance
 
 ---
 
-## Phase 4: Content Adaptation ⬜
-**Status:** Planned
+## Phase 3: Words Module (COMPLETED)
 
-### Kid-Friendly Vocabulary
-Replace adult vocab with categories kids love:
+### Word Pool Architecture
+- [x] Shared word pool from 'default' user in database
+- [x] Words stored in database (words table, user_id='default')
+- [x] Per-user progress tracked in localStorage
+- [x] Custom audio recordings for each word
 
-**Animals (животни)**
-- куче (kuche) - dog 🐕
-- котка (kotka) - cat 🐱
-- мечка (mechka) - bear 🐻
-- птица (ptitsa) - bird 🐦
-- риба (riba) - fish 🐟
-- заек (zaek) - rabbit 🐰
+### Smart Pooling / Spaced Repetition
+- [x] Active pool (5-8 words learning at a time)
+- [x] Priority scoring (struggling words get more practice)
+- [x] Gradual word introduction (1-2 new words per session)
+- [x] Mastery requires 3 correct + >60% accuracy
 
-**Colors (цветове)**
-- червено (cherveno) - red 🔴
-- синьо (sinyo) - blue 🔵
-- жълто (zhalto) - yellow 🟡
-- зелено (zeleno) - green 🟢
-- розово (rozovo) - pink 💗
-
-**Family (семейство)**
-- мама (mama) - mom 👩
-- татко (tatko) - dad 👨
-- баба (baba) - grandma 👵
-- дядо (dyado) - grandpa 👴
-- бебе (bebe) - baby 👶
-
-**Food Kids Like**
-- ябълка (yabalka) - apple 🍎
-- банан (banan) - banana 🍌
-- сладолед (sladoled) - ice cream 🍦
-- бисквита (biskvita) - cookie 🍪
-
-**Numbers 1-5**
-- едно (edno) - one ☝️
-- две (dve) - two ✌️
-- три (tri) - three
-- четири (chetiri) - four
-- пет (pet) - five 🖐️
+### Quiz Features
+- [x] 2-choice quiz format
+- [x] Audio playback for words
+- [x] Transliteration display
+- [x] Mastery can be lost if wrong answer given
 
 ---
 
-## Phase 5: Audio & Feedback ⬜
-**Status:** Planned
+## Phase 4: Gamification (COMPLETED)
 
-### Sound Effects
-- [ ] Happy chime for correct
-- [ ] Gentle "try again" for wrong
-- [ ] Fanfare for sticker unlock
-- [ ] Star filling sound
-- [ ] Baba Point coin sound
+### Baba Points Currency
+- [x] +1 point per correct answer
+- [x] +3 bonus for mastery
+- [x] +2 bonus for Test Me correct
+- [x] Visual coin animation popup
+- [x] Running total displayed with Baba icon
 
-### TTS Adjustments
-- Slower speech rate (0.5x)
-- Clearer pronunciation
-- English hints always spoken
+### TV Store Marketplace
+- [x] Buy TV time with Baba Points (50/100/200 pts)
+- [x] TV time voucher system for parent approval
+- [x] Purchase history tracking
+- [x] Balance display on home screen
 
-### Mascot Reactions
-- Correct: Bear jumps happily
-- Wrong: Bear gives encouraging wave
-- Streak: Bear does a dance
-- New sticker: Bear holds sticker
+### Stickers/Achievements
+- [x] 8 achievement stickers
+- [x] First Try, Letter Learner, Word Wizard
+- [x] Hot Streak, Superstar, Baba's Helper
+- [x] Bear's Friend, Champion
+- [x] Unlock animations and sounds
 
----
+### Daily Stars
+- [x] 5 daily stars to fill
+- [x] Each correct answer fills one star
+- [x] Daily reset at midnight
+- [x] Superstar sticker for completion
 
-## Phase 6: Polish & Deploy ⬜
-**Status:** Planned
-
-- [ ] Test all interactions
-- [ ] Verify audio works on mobile
-- [ ] Add PWA manifest for kids version
-- [ ] Deploy to Vercel
-- [ ] Test on iPad/tablet (common for kids)
-
----
-
-## Implementation Order
-
-1. **Phase 1** - HTML structure (scaffold)
-2. **Phase 2** - CSS styling (make it pretty)
-3. **Phase 3** - JS gamification (Baba Points)
-4. **Phase 4** - Kid vocabulary data
-5. **Phase 5** - Audio polish
-6. **Phase 6** - Deploy
+### Milestones
+- [x] Celebrations at 5, 10, 25, 50, 75, 100 words mastered
+- [x] Modal with confetti animation
+- [x] Activity logging for milestones
 
 ---
 
-## Success Criteria
+## Phase 5: Communication (COMPLETED)
 
-- [ ] 5-year-old can use without reading
-- [ ] All interactions have audio feedback
-- [ ] Buttons large enough for small fingers
-- [ ] Earning Baba Points feels rewarding
-- [ ] Session length ~5 minutes
-- [ ] Parents can easily reset if needed
+### Inbox for Messages
+- [x] Receive messages from grandparents/parents
+- [x] Voice message playback support
+- [x] Mark as read functionality
+- [x] Unread badge count on inbox icon
+- [x] Time ago display
+
+### Send Message Feature
+- [x] Text message composition
+- [x] Voice message recording
+- [x] Quick message presets
+- [x] Send to any user by name
+
+### Parent/Admin View Progress
+- [x] View any user's stats by name
+- [x] Points, streaks, mastered counts
+- [x] Word list display
+- [x] Send encouragement option
+
+---
+
+## Phase 6: Admin Dashboard (COMPLETED)
+
+### Admin User Detection
+- [x] Admin mode for user 'admin'
+- [x] Automatic redirect to dashboard
+- [x] Admin-only UI elements
+
+### View All Users Stats
+- [x] List all registered users
+- [x] Points, words mastered, best streak
+- [x] Last active timestamp
+- [x] Click to view detailed stats
+
+### Activity History
+- [x] Recent activity feed per user
+- [x] Event icons (correct, wrong, mastered, etc.)
+- [x] Activity timestamps
+- [x] Filter by event type
+
+### Send Encouragement
+- [x] Direct message to any user
+- [x] Quick access from user detail view
+- [x] Voice or text messages
+
+### Admin Letter Recording
+- [x] Record audio for each letter (in ABC module)
+- [x] 3-2-1 countdown before recording
+- [x] Save to database
+- [x] Preview before saving
+
+---
+
+## FUTURE PHASES
+
+### Phase 7: Test Me Module Improvements
+- [ ] Speech recognition feedback
+- [ ] Automatic correct/wrong detection
+- [ ] Pronunciation scoring
+- [ ] Recording comparison playback
+
+### Phase 8: More Gamification Features
+- [ ] Weekly challenges
+- [ ] Leaderboard (family members)
+- [ ] Bonus point multipliers
+- [ ] Special event rewards
+
+### Phase 9: Parent Controls
+- [ ] Pin-protected settings
+- [ ] Time limits
+- [ ] Content filtering by category
+- [ ] Progress reports via email
+
+### Phase 10: Content Expansion
+- [ ] Sentences module
+- [ ] Story mode
+- [ ] More vocabulary categories
+- [ ] Numbers and counting
+
+---
+
+## Technical Stack
+
+| Component | Technology |
+|-----------|------------|
+| Frontend | Vanilla HTML/CSS/JS |
+| Database | Supabase (PostgreSQL) |
+| Hosting | Vercel |
+| Audio | Web Audio API, MediaRecorder |
+| TTS | Web Speech API |
+| PWA | Service Worker ready |
+
+---
+
+## File Structure
+
+```
+bulgarian-kids/
+├── index.html          # Single page app UI
+├── styles.css          # All styles
+├── app.js              # All logic (~3400 lines)
+├── baba.png            # Mascot image
+├── supabase-setup.sql  # Database setup scripts
+├── CLAUDE.md           # Quick reference for Claude
+├── PROJECT_PLAN.md     # This file
+├── TRACKER.md          # Component status tracker
+├── README.md           # Project overview
+└── docs/               # Additional documentation
+```
+
+---
+
+## Commands
+
+```bash
+# Local development
+python3 -m http.server 8080
+
+# Deploy to production
+npx vercel --prod --yes
+
+# Test URLs
+http://localhost:8080?user=julian
+http://localhost:8080?user=admin
+```

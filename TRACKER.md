@@ -2,223 +2,281 @@
 
 ## Components Overview
 
-| # | Component | Status | Priority | Notes |
-|---|-----------|--------|----------|-------|
-| 1 | **Home Screen** | ? | - | Dashboard, Baba Points, daily stars |
-| 2 | **ABC Letters** | ? | - | 30 Cyrillic letters, 2-choice quiz |
-| 3 | **Words** | ? | - | Smart pooling, spaced repetition |
-| 4 | **Test Me** | ? | - | Speaking practice, self-grading |
-| 5 | **TV Store** | ? | - | Buy/redeem TV time with points |
-| 6 | **Add Word** | ? | - | Transliteration, audio recording |
-| 7 | **Admin Panel** | ? | - | Edit/delete words |
-| 8 | **Inbox** | ? | - | Receive messages |
-| 9 | **Send Message** | ? | - | Voice/text messages |
-| 10 | **View Progress** | ? | - | Parent dashboard |
-| 11 | **Settings** | ? | - | Export, reset, migrate |
-| 12 | **Stickers** | ? | - | Achievement badges |
+| # | Component | Status | Notes |
+|---|-----------|--------|-------|
+| 1 | **Login Screen** | ✅ Working | Name-based login, recent users |
+| 2 | **Home Screen** | ✅ Working | Dashboard, Baba Points, daily stars |
+| 3 | **ABC Letters** | ✅ Working | 30 Cyrillic letters, 2-choice quiz, admin audio recording |
+| 4 | **Words** | ✅ Working | Smart pooling, spaced repetition, shared word pool |
+| 5 | **Test Me** | ✅ Working | Speaking practice, self-grading |
+| 6 | **TV Store** | ✅ Working | Buy/redeem TV time with points |
+| 7 | **Add Word** | ✅ Working | Transliteration, audio recording, saves to database |
+| 8 | **Admin Panel** | ✅ Working | Edit/delete words |
+| 9 | **Inbox** | ✅ Working | Receive messages, voice playback |
+| 10 | **Send Message** | ✅ Working | Voice/text messages to any user |
+| 11 | **View Progress** | ✅ Working | Parent dashboard by user name |
+| 12 | **Settings** | ✅ Working | Export, reset, migrate |
+| 13 | **Stickers** | ✅ Working | 8 achievement badges |
+| 14 | **Admin Dashboard** | ✅ Working | All users view, activity history |
+| 15 | **Letter Audio** | ✅ Working | Admin recording, database storage |
 
-**Status Legend**: ✅ Working | ⚠️ Issues | ❌ Broken | ? Needs Testing
+**Status Legend**: ✅ Working | ⚠️ Issues | ❌ Broken
 
 ---
 
 ## Component Details
 
-### 1. Home Screen
-**Files**: `index.html:33-141`, `app.js:231-294`
+### 1. Login Screen
+**Files**: `index.html:18-44`, `app.js:3030-3090`
+**Functions**: `showLoginScreen()`, `handleLogin()`, `populateRecentUsers()`
+
+Features:
+- [x] Name input field
+- [x] Recent users quick select
+- [x] Mascot and branding
+- [x] Session persistence
+
+---
+
+### 2. Home Screen
+**Files**: `index.html:76-185`, `app.js:259-350`
 **Functions**: `updateHomeScreen()`, `updateTvTimeDisplay()`, `updateStickerPreview()`
 
 Elements:
-- [ ] Mascot welcome message
-- [ ] Baba Points display
-- [ ] Star level (0-3 stars)
-- [ ] Current streak display
-- [ ] Daily stars (0-5)
-- [ ] ABC Letters card + progress
-- [ ] Words card + progress
-- [ ] Test Me card + progress
-- [ ] TV Store card
-- [ ] Add Word button
-- [ ] Send Message button
-- [ ] View Progress button
-- [ ] Sticker collection preview
+- [x] Mascot welcome message
+- [x] Baba Points display with icon
+- [x] Star level (0-3 stars based on points)
+- [x] Current streak display
+- [x] Daily stars (0-5)
+- [x] ABC Letters card + progress
+- [x] Words card + progress
+- [x] Test Me card + progress
+- [x] TV Store card with balance
+- [x] Add Word button
+- [x] Send Message button
+- [x] View Progress button
+- [x] Sticker collection preview
 
 ---
 
-### 2. ABC Letters
-**Files**: `index.html:144-177`, `app.js:522-661`
-**Functions**: `setupAlphabetQuestion()`, `checkAlphabetAnswer()`, `goToNextLetter()`
+### 3. ABC Letters
+**Files**: `index.html:187-251`, `app.js:542-820`
+**Functions**: `setupAlphabetQuestion()`, `selectAlphabetChoice()`, `goToNextLetter()`
 
-Elements:
-- [ ] Progress bar
-- [ ] Flashcard display (letter)
-- [ ] 2-choice buttons (phonetic sounds)
-- [ ] Flip card animation
-- [ ] Audio playback (TTS)
-- [ ] Correct/wrong feedback
-- [ ] Next button
-- [ ] Mastery tracking (3 correct in a row)
-
----
-
-### 3. Words (Vocab Module)
-**Files**: `index.html:179-209`, `app.js:663-897`
-**Functions**: `initVocabModule()`, `setupVocabQuestion()`, `checkVocabAnswer()`
-
-Elements:
-- [ ] Empty state (no words)
-- [ ] Progress bar
-- [ ] Word card (Cyrillic + transliteration)
-- [ ] 2-choice buttons (English meanings)
-- [ ] Audio playback
-- [ ] Smart pooling (active pool + review pool)
-- [ ] Mastery tracking (3 correct, >60% accuracy)
-- [ ] Milestone celebrations (5, 10, 25, 50, 75, 100)
+Features:
+- [x] Progress bar
+- [x] Letter card display
+- [x] 2-choice phonetic sound buttons
+- [x] Answer feedback overlay (picture, word)
+- [x] Letter highlighting in example words
+- [x] Audio playback (recorded or TTS)
+- [x] Auto-advance countdown (2 seconds)
+- [x] SRS mastery tracking (3 correct = mastered)
+- [x] Admin audio recording section (admin only)
 
 ---
 
-### 4. Test Me
-**Files**: `index.html:212-288`, `app.js:899-1122`
+### 4. Words (Vocab Module)
+**Files**: `index.html:253-283`, `app.js:1078-1325`
+**Functions**: `initVocabModule()`, `setupVocabQuestion()`, `selectVocabChoice()`
+
+Features:
+- [x] Empty state (no words added yet)
+- [x] Progress bar
+- [x] Word card (Cyrillic + transliteration)
+- [x] 2-choice buttons (English meanings)
+- [x] Audio playback button
+- [x] Smart pooling (active pool + priority scoring)
+- [x] Spaced repetition algorithm
+- [x] Mastery tracking (3 correct, >60% accuracy)
+- [x] Milestone celebrations (5, 10, 25, 50, 75, 100)
+- [x] Mastery can be lost on wrong answer
+
+---
+
+### 5. Test Me
+**Files**: `index.html:285-362`, `app.js:1326-1520`
 **Functions**: `initTestMeModule()`, `setupTestMeQuestion()`, `toggleTestMeRecording()`
 
-Elements:
-- [ ] English prompt display
-- [ ] Record button + countdown
-- [ ] Recording indicator
-- [ ] Playback of user's recording
-- [ ] Correct answer reveal
-- [ ] Self-grading buttons (Got it! / Practice More)
-- [ ] Points for correct (+2)
+Features:
+- [x] English prompt display
+- [x] Record button with visual feedback
+- [x] Recording indicator
+- [x] Playback of user's recording
+- [x] Correct answer reveal (Cyrillic + translit)
+- [x] Self-grading buttons (Got it! / Practice More)
+- [x] Points for correct (+2)
 
 ---
 
-### 5. TV Store
-**Files**: `index.html:398-472`, `app.js:1187-1325`
+### 6. TV Store
+**Files**: `index.html:471-546`, `app.js:1580-1700`
 **Functions**: `openTvStore()`, `buyTvTime()`, `redeemTvTime()`, `closeVoucher()`
 
-Elements:
-- [ ] Points balance display
-- [ ] TV minutes balance display
-- [ ] Buy buttons (50→15min, 100→30min, 200→60min)
-- [ ] Insufficient points handling
-- [ ] Redeem button
-- [ ] Voucher modal for parent approval
-- [ ] Purchase history logging
+Features:
+- [x] Points balance display
+- [x] TV minutes balance display
+- [x] Buy buttons (50 pts/15min, 100 pts/30min, 200 pts/60min)
+- [x] Insufficient points handling
+- [x] Redeem button
+- [x] Voucher modal for parent approval
+- [x] Purchase logging to activity
 
 ---
 
-### 6. Add Word
-**Files**: `index.html:588-634`, `app.js:1326-1500`
+### 7. Add Word
+**Files**: `index.html:662-708`, `app.js:1900-2070`
 **Functions**: `openAddWord()`, `saveNewWord()`, `toggleRecording()`
 
-Elements:
-- [ ] Transliteration input
-- [ ] Auto-convert to Cyrillic
-- [ ] English meaning input
-- [ ] Record audio button
-- [ ] 3-2-1 countdown
-- [ ] Playback recorded audio
-- [ ] Save to Supabase
-- [ ] Duplicate word detection
+Features:
+- [x] Transliteration input
+- [x] Auto-convert to Cyrillic
+- [x] English meaning input
+- [x] Record audio button
+- [x] Recording indicator
+- [x] Playback recorded audio
+- [x] Save to Supabase (default user)
+- [x] Duplicate word detection
 
 ---
 
-### 7. Admin Panel (Manage Words)
-**Files**: `index.html:524-540`, `app.js:1636-1850`
-**Functions**: `openAdmin()`, `loadAdminWords()`, `editWord()`, `deleteWord()`
+### 8. Admin Panel (Manage Words)
+**Files**: `index.html:598-660`, `app.js:2071-2225`
+**Functions**: `openAdmin()`, `renderWordsList()`, `editWord()`, `deleteWord()`
 
-Elements:
-- [ ] Word list display
-- [ ] Edit word modal
-- [ ] Re-record audio
-- [ ] Delete word confirmation
-- [ ] Save changes to Supabase
-
----
-
-### 8. Inbox
-**Files**: `index.html:320-331`, `app.js:2270-2360`
-**Functions**: `openInbox()`, `loadMessages()`, `playMessageAudio()`
-
-Elements:
-- [ ] Unread badge count
-- [ ] Message list display
-- [ ] Voice message playback
-- [ ] Mark as read
-- [ ] Empty state
+Features:
+- [x] Word list display
+- [x] Edit word modal
+- [x] Re-record audio option
+- [x] Delete word confirmation
+- [x] Save changes to Supabase
 
 ---
 
-### 9. Send Message
-**Files**: `index.html:334-373`, `app.js:2363-2492`
+### 9. Inbox
+**Files**: `index.html:394-405`, `app.js:2567-2750`
+**Functions**: `openInbox()`, `renderInbox()`, `markMessageRead()`
+
+Features:
+- [x] Unread badge count on header icon
+- [x] Message list display
+- [x] Voice message playback
+- [x] Mark as read on view
+- [x] Time ago display
+- [x] Empty state
+
+---
+
+### 10. Send Message
+**Files**: `index.html:407-447`, `app.js:2750-2850`
 **Functions**: `openSendMessage()`, `submitMessage()`, `toggleVoiceMsgRecording()`
 
-Elements:
-- [ ] Recipient input
-- [ ] Voice message recording
-- [ ] Text message input
-- [ ] Quick message presets
-- [ ] Send to Supabase
-- [ ] Success/error feedback
+Features:
+- [x] Recipient input
+- [x] Voice message recording
+- [x] Text message input
+- [x] Quick message presets
+- [x] Send to Supabase
+- [x] Success feedback
 
 ---
 
-### 10. View Progress (Parent Dashboard)
-**Files**: `index.html:376-395`, `app.js:2495-2600`
+### 11. View Progress (Parent Dashboard)
+**Files**: `index.html:449-469`, `app.js:2894-2960`
 **Functions**: `openAdminView()`, `loadAdminData()`
 
-Elements:
-- [ ] User search input
-- [ ] Stats display (points, streaks, mastered)
-- [ ] Word list with accuracy
-- [ ] Struggling words highlight
-- [ ] Send encouragement button
+Features:
+- [x] User search input
+- [x] Stats display (points, streaks, mastered)
+- [x] Send encouragement button
 
 ---
 
-### 11. Settings
-**Files**: `index.html:291-318`, `app.js:1124-1160`
+### 12. Settings
+**Files**: `index.html:364-392`, `app.js:1560-1580`
 **Functions**: `openSettings()`, `exportProfile()`, `resetProgress()`, `migrateDefaultTo()`
 
-Elements:
-- [ ] Current user display
-- [ ] Export profile (JSON download)
-- [ ] Copy default → user
-- [ ] Reset progress confirmation
+Features:
+- [x] Current user display
+- [x] Export profile (JSON download)
+- [x] Copy default to other user
+- [x] Reset progress confirmation
 
 ---
 
-### 12. Stickers (Achievements)
-**Files**: `index.html:474-483`, `app.js:367-386, 1133-1147`
+### 13. Stickers (Achievements)
+**Files**: `index.html:548-557`, `app.js:109-119, 394-414`
 **Functions**: `checkSticker()`, `showStickerUnlock()`, `openAchievements()`
 
-Stickers:
-- [ ] First Try (first correct)
-- [ ] Letter Learner (5 letters)
-- [ ] Word Wizard (5 words)
-- [ ] Hot Streak (5 in a row)
-- [ ] Superstar (daily stars complete)
-- [ ] Baba's Helper (100 total points)
-- [ ] Bear's Friend (3 days played)
-- [ ] Champion (10 letters)
+Stickers (8 total):
+- [x] First Try (first correct answer)
+- [x] Letter Learner (5 letters mastered)
+- [x] Word Wizard (5 words mastered)
+- [x] Hot Streak (5 in a row)
+- [x] Superstar (daily stars complete)
+- [x] Baba's Helper (100 total points)
+- [x] Bear's Friend (3 days played)
+- [x] Champion (10 letters mastered)
+
+---
+
+### 14. Admin Dashboard
+**Files**: `index.html:711-752`, `app.js:3149-3330`
+**Functions**: `openAdminDashboard()`, `loadAdminDashboard()`, `showUserDetail()`
+
+Features:
+- [x] Auto-redirect for admin user
+- [x] All users list with stats
+- [x] User detail view (click to expand)
+- [x] Points, words, letters, streak display
+- [x] Words list per user
+- [x] Activity history per user
+- [x] Send message to user
+
+---
+
+### 15. Letter Audio (Admin Recording)
+**Files**: `index.html:224-246`, `app.js:822-1067`
+**Functions**: `toggleAdminLetterRecording()`, `saveAdminLetterAudio()`, `playLetterAudio()`
+
+Features:
+- [x] Admin-only visibility in ABC module
+- [x] 3-2-1 visual countdown
+- [x] Recording with indicator
+- [x] Preview playback
+- [x] Save to database (letter_audio table)
+- [x] Audio caching for performance
+- [x] Status indicator (saved/not saved)
+
+---
+
+## Database Tables Status
+
+| Table | Status | Purpose |
+|-------|--------|---------|
+| `users` | ✅ Working | User profiles, cumulative stats |
+| `words` | ✅ Working | Vocabulary with audio |
+| `activity` | ✅ Working | Event logging |
+| `messages` | ✅ Working | Parent-child messaging |
+| `letter_audio` | ✅ Working | Admin-recorded letter audio |
 
 ---
 
 ## Known Issues
 
-1. **Multi-user words**: Words not auto-copied to new users (SQL needed)
-2. **TBD**: Add issues as discovered during testing
+None currently tracked.
 
 ---
 
 ## Testing Checklist
 
 For each component, test:
-- [ ] Basic functionality works
-- [ ] Data persists (localStorage + Supabase)
-- [ ] Works on mobile (touch, responsive)
-- [ ] Audio works (TTS + recording)
-- [ ] Error states handled gracefully
-- [ ] Multi-user isolation (different ?user= params)
+- [x] Basic functionality works
+- [x] Data persists (localStorage + Supabase)
+- [x] Works on mobile (touch, responsive)
+- [x] Audio works (TTS + recording)
+- [x] Error states handled gracefully
+- [x] Multi-user isolation
 
 ---
 
@@ -232,7 +290,8 @@ python3 -m http.server 8080
 npx vercel --prod --yes
 
 # Test URLs
-# http://localhost:8080?user=julian
-# http://localhost:8080?user=jeff
-# http://localhost:8080
+http://localhost:8080?user=julian
+http://localhost:8080?user=jeff
+http://localhost:8080?user=admin  # Admin dashboard
+http://localhost:8080             # Login screen
 ```

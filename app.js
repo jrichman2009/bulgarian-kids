@@ -49,7 +49,8 @@ function initSupabase() {
 }
 
 // ============ Alphabet with Pictures ============
-const ALPHABET = [
+// Fallback data if database is unavailable
+const ALPHABET_FALLBACK = [
     { letter: 'А а', soundBg: 'ааа', soundEn: 'ahh', phonetic: 'ah', hint: 'like "a" in "father"', picture: '🍎', word: 'ябълка', wordEn: 'apple', translit: 'yabulka' },
     { letter: 'Б б', soundBg: 'бъ', soundEn: 'buh', phonetic: 'b', hint: 'like "b" in "boy"', picture: '🐻', word: 'баба', wordEn: 'grandma', translit: 'baba' },
     { letter: 'В в', soundBg: 'въ', soundEn: 'vuh', phonetic: 'v', hint: 'like "v" in "van"', picture: '🌊', word: 'вълна', wordEn: 'wave', translit: 'vulna' },
@@ -81,6 +82,9 @@ const ALPHABET = [
     { letter: 'Ю ю', soundBg: 'юу', soundEn: 'yoo', phonetic: 'yu', hint: 'like "u" in "cute"', picture: '🎠', word: 'юла', wordEn: 'spinning top', translit: 'yula' },
     { letter: 'Я я', soundBg: 'яа', soundEn: 'yah', phonetic: 'ya', hint: 'like "ya" in "yard"', picture: '🍳', word: 'яйце', wordEn: 'egg', translit: 'yaytse' },
 ];
+
+// Active alphabet array - will be loaded from database or use fallback
+let ALPHABET = [...ALPHABET_FALLBACK];
 
 
 // ============ TV Time Rewards ============
@@ -814,7 +818,7 @@ function updateAlphabetProgress() {
     document.getElementById('alphabetMasteredCount').textContent =
         `${mastered} of ${introduced} learned!`;
 
-    const progress = (mastered / 30) * 100;
+    const progress = (mastered / ALPHABET.length) * 100;
     document.getElementById('alphabetProgressBar').style.width = `${progress}%`;
     document.getElementById('streakDisplay').textContent = `🔥 ${state.game.currentStreak}`;
 }
@@ -852,12 +856,68 @@ async function loadLetterAudioFromDatabase() {
     }
 }
 
+// Load letters from database (with audio stored in letters table)
+async function loadLettersFromDatabase() {
+    if (!db) {
+        console.log('No database connection - using fallback alphabet');
+        ALPHABET = [...ALPHABET_FALLBACK];
+        return;
+    }
+
+    try {
+        const { data, error } = await db
+            .from('letters')
+            .select('*')
+            .order('letter_index', { ascending: true });
+
+        if (error) {
+            console.error('Error loading letters:', error);
+            ALPHABET = [...ALPHABET_FALLBACK];
+            return;
+        }
+
+        if (data && data.length > 0) {
+            // Map database fields to expected ALPHABET format
+            const dbLetters = data.map(l => ({
+                letter: l.letter,
+                soundBg: l.sound_bg,
+                soundEn: l.sound_en,
+                phonetic: l.phonetic,
+                hint: l.hint,
+                picture: l.picture,
+                word: l.word,
+                wordEn: l.word_en,
+                translit: l.translit,
+                audio: l.audio // Audio stored directly in letters table
+            }));
+
+            ALPHABET = dbLetters;
+
+            // Also populate letterAudioCache from database audio field
+            data.forEach(l => {
+                if (l.audio) {
+                    letterAudioCache[l.letter_index] = l.audio;
+                }
+            });
+
+            console.log(`Loaded ${dbLetters.length} letters from database`);
+        } else {
+            console.log('No letters found in database - using fallback');
+            ALPHABET = [...ALPHABET_FALLBACK];
+        }
+    } catch (err) {
+        console.error('Letters load error:', err);
+        ALPHABET = [...ALPHABET_FALLBACK];
+    }
+}
+
 // Play letter audio - uses recorded audio if available, TTS otherwise
 async function playLetterAudio(letterIndex, letter) {
-    // Check if we have recorded audio in cache
-    if (letterAudioCache[letterIndex]) {
+    // Check if we have recorded audio in cache or in the letter object
+    const audioData = letterAudioCache[letterIndex] || (letter && letter.audio);
+    if (audioData) {
         try {
-            const audio = new Audio(letterAudioCache[letterIndex]);
+            const audio = new Audio(audioData);
             audio.play().catch(err => {
                 console.error('Letter audio playback error:', err);
                 speakLetterWithHint(letter);
@@ -881,9 +941,10 @@ function showAdminLetterRecording(letterIndex) {
     adminLetterRecordedBase64 = null;
     document.getElementById('adminLetterPlayback').classList.add('hidden');
 
-    // Update status based on whether audio exists
+    // Update status based on whether audio exists (check both cache and ALPHABET)
     const statusEl = document.getElementById('adminAudioStatus');
-    if (letterAudioCache[letterIndex]) {
+    const hasAudio = letterAudioCache[letterIndex] || (ALPHABET[letterIndex] && ALPHABET[letterIndex].audio);
+    if (hasAudio) {
         statusEl.textContent = '✅ Audio saved in database';
         statusEl.classList.add('has-audio');
         statusEl.classList.remove('error');
@@ -997,7 +1058,7 @@ function playAdminLetterRecording() {
     }
 }
 
-// Save admin letter audio to database
+// Save admin letter audio to database (saves to letters table)
 async function saveAdminLetterAudio() {
     if (!adminLetterRecordedBase64) {
         showUnlockMessage('Record audio first!');
@@ -1017,41 +1078,22 @@ async function saveAdminLetterAudio() {
     statusEl.classList.remove('has-audio', 'error');
 
     try {
-        // Check if audio already exists for this letter
-        const { data: existing } = await db
-            .from('letter_audio')
-            .select('id')
-            .eq('letter_index', letterIndex)
-            .single();
+        // Update the audio field in the letters table
+        const { error } = await db
+            .from('letters')
+            .update({
+                audio: adminLetterRecordedBase64,
+                updated_at: new Date().toISOString()
+            })
+            .eq('letter_index', letterIndex);
 
-        if (existing) {
-            // Update existing record
-            const { error } = await db
-                .from('letter_audio')
-                .update({
-                    audio: adminLetterRecordedBase64,
-                    recorded_by: CURRENT_USER,
-                    updated_at: new Date().toISOString()
-                })
-                .eq('letter_index', letterIndex);
+        if (error) throw error;
 
-            if (error) throw error;
-        } else {
-            // Insert new record
-            const { error } = await db
-                .from('letter_audio')
-                .insert({
-                    letter_index: letterIndex,
-                    letter: letter.letter,
-                    audio: adminLetterRecordedBase64,
-                    recorded_by: CURRENT_USER
-                });
-
-            if (error) throw error;
-        }
-
-        // Update cache
+        // Update cache and local ALPHABET
         letterAudioCache[letterIndex] = adminLetterRecordedBase64;
+        if (ALPHABET[letterIndex]) {
+            ALPHABET[letterIndex].audio = adminLetterRecordedBase64;
+        }
 
         statusEl.textContent = '✅ Audio saved successfully!';
         statusEl.classList.add('has-audio');
@@ -3097,6 +3139,7 @@ async function initializeApp() {
         loadState();
 
         if (db) {
+            await loadLettersFromDatabase();
             await loadWordsFromDatabase();
             await loadUserProfile();
             await loadLetterAudioFromDatabase();
